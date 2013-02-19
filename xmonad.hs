@@ -25,13 +25,9 @@ main = do
     xmonad $ ewmh $ defaultConfig
         { borderWidth        = 2
         , workspaces         = myWorkspaces
+        , layoutHook         = myLayoutHook
         , modMask            = myModMask
         , keys               = myKeys
-        , mouseBindings      = myMouseBindings
-        , startupHook        = setDefaultCursor xC_left_ptr
-        , layoutHook         = myLayoutHook
-        , manageHook         = manageHook defaultConfig <+> manageDocks
-        , handleEventHook    = handleEventHook defaultConfig <+> docksEventHook <+> fullscreenEventHook
         , logHook            = dynamicLogWithPP defaultPP
                                  { ppOutput               = hPutStrLn xmproc
                                  , ppOrder                = \(ws:l:t:_) -> [l,ws,t]
@@ -43,6 +39,10 @@ main = do
                                  , ppTitle                = xmobarColor "black"  "green"  . shorten 70 . wrap " " " "
                                  , ppUrgent               = xmobarColor "red"    "yellow"
                                  }
+        , startupHook        = setDefaultCursor xC_left_ptr
+        , mouseBindings      = myMouseBindings
+        , manageHook         = manageHook defaultConfig <+> manageDocks
+        , handleEventHook    = handleEventHook defaultConfig <+> docksEventHook <+> fullscreenEventHook
         }
 
 
