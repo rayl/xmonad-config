@@ -11,6 +11,7 @@ main = do
     xmproc <- spawnPipe $ "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
     xmonad $ defaultConfig
         { borderWidth        = 2
+        , workspaces         = myWorkspaces
         , startupHook        = setDefaultCursor xC_left_ptr
         , layoutHook         = avoidStruts $ layoutHook defaultConfig
         , manageHook         = manageHook defaultConfig <+> manageDocks
@@ -27,3 +28,13 @@ main = do
                                  , ppUrgent               = xmobarColor "red"    "yellow"
                                  }
         }
+
+
+------------------------------------------------------------------------
+-- WORKSPACES
+------------------------------------------------------------------------
+myWorkspaces = zipWith (\n l -> show n ++ "-" ++ l)
+               [1..9]
+               ["goog","todo","book","hask","*","*","*","*","mp3s"]
+
+
