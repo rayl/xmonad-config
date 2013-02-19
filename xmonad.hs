@@ -8,6 +8,7 @@ import XMonad.Actions.WindowBringer
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.SetWMName
 import XMonad.Layout.MouseResizableTile
 import XMonad.Layout.MultiColumns
 import XMonad.Layout.MultiToggle
@@ -171,5 +172,5 @@ myLogHook c u d = logHook c
 ------------------------------------------------------------------------
 -- STARTUP
 ------------------------------------------------------------------------
-myStartupHook = setDefaultCursor xC_left_ptr
-
+myStartupHook =  setDefaultCursor xC_left_ptr
+             <+> setWMName "LG3D"
