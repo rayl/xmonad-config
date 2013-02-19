@@ -21,14 +21,15 @@ import XMonad.Util.Run(spawnPipe)
 home = "/home/local/.xmonad/"
 
 main = do
-    xmproc <- spawnPipe $ "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
+    barUp   <- spawnPipe $ "/usr/bin/xmobar " ++ home ++ "xmobar-top"
+    barDown <- spawnPipe $ "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
     xmonad $ ewmh $ defaultConfig
         { borderWidth        = 2
         , workspaces         = myWorkspaces
         , layoutHook         = myLayoutHook
         , modMask            = myModMask
         , keys               = myKeys
-        , logHook            = myLogHook xmproc
+        , logHook            = myLogHook barUp barDown
         , startupHook        = myStartupHook
         , mouseBindings      = myMouseBindings
         , manageHook         = myManageHook defaultConfig
@@ -142,15 +143,24 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 ------------------------------------------------------------------------
 -- LOGGING
 ------------------------------------------------------------------------
-myLogHook pipe = dynamicLogWithPP defaultPP
-        { ppOutput   = hPutStrLn pipe
-        , ppOrder    = \(ws:l:t:_) -> [l,ws,t]
+myLogHook u d = return ()
+
+    >> -- top status bar
+    dynamicLogWithPP defaultPP
+        { ppOutput   = hPutStrLn u
+        , ppOrder    = \(ws:l:t:_) -> [t]
+        , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  "
+        }
+
+    >> -- bottom status bar
+    dynamicLogWithPP defaultPP
+        { ppOutput   = hPutStrLn d
+        , ppOrder    = \(ws:l:t:_) -> [l,ws]
         , ppSep      = " "
         , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
         , ppWsSep    = " "
-        , ppCurrent  = xmobarColor "black"  "yellow" . shorten 9
-        , ppHidden   = xmobarColor "white"  ""       . shorten 9
-        , ppTitle    = xmobarColor "black"  "green"  . shorten 70 . wrap " " " "
+        , ppCurrent  = xmobarColor "black"  "yellow"
+        , ppHidden   = xmobarColor "white"  ""
         , ppUrgent   = xmobarColor "red"    "yellow"
         }
 
