@@ -6,6 +6,7 @@ import XMonad.Actions.CycleWS (nextWS, prevWS, toggleWS, toggleOrView)
 import XMonad.Actions.SwapWorkspaces
 import XMonad.Actions.WindowBringer
 import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Layout.MouseResizableTile
 import XMonad.Layout.MultiColumns
@@ -21,7 +22,7 @@ home = "/home/local/.xmonad/"
 
 main = do
     xmproc <- spawnPipe $ "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
-    xmonad $ defaultConfig
+    xmonad $ ewmh $ defaultConfig
         { borderWidth        = 2
         , workspaces         = myWorkspaces
         , modMask            = myModMask
@@ -30,7 +31,7 @@ main = do
         , startupHook        = setDefaultCursor xC_left_ptr
         , layoutHook         = myLayoutHook
         , manageHook         = manageHook defaultConfig <+> manageDocks
-        , handleEventHook    = handleEventHook defaultConfig <+> docksEventHook
+        , handleEventHook    = handleEventHook defaultConfig <+> docksEventHook <+> fullscreenEventHook
         , logHook            = dynamicLogWithPP defaultPP
                                  { ppOutput               = hPutStrLn xmproc
                                  , ppOrder                = \(ws:l:t:_) -> [l,ws,t]
