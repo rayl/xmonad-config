@@ -4,6 +4,7 @@ import System.Exit
 import System.IO
 import XMonad
 import XMonad.Actions.CycleWS (nextWS, prevWS, toggleWS, toggleOrView)
+import XMonad.Actions.Search
 import XMonad.Actions.SwapWorkspaces
 import XMonad.Actions.WindowBringer
 import XMonad.Hooks.DynamicLog
@@ -16,6 +17,7 @@ import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.Named (named)
 import XMonad.Layout.NoBorders
+import XMonad.Prompt
 import qualified XMonad.StackSet as W
 import XMonad.Util.Cursor
 import XMonad.Util.Run(spawnPipe)
@@ -95,8 +97,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
         , ((modm, xK_a       ), spawn $ XMonad.terminal conf)
         , ((modS, xK_a       ), spawn "dmenu_run")
-        , ((modm, xK_s       ), gotoMenu)
-        , ((modS, xK_s       ), bringMenu)
+        , ((modm, xK_s       ), promptSearch defaultXPConfig google)
+        , ((modS, xK_s       ), selectSearch google)
+        , ((modm, xK_d       ), gotoMenu)
+        , ((modS, xK_d       ), bringMenu)
         , ((modm, xK_h       ), sendMessage Shrink)
         , ((modS, xK_h       ), sendMessage ShrinkSlave)
         , ((modm, xK_j       ), windows W.focusDown)
