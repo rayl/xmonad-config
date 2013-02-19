@@ -29,7 +29,7 @@ main = do
         , layoutHook         = myLayoutHook
         , modMask            = myModMask
         , keys               = myKeys
-        , logHook            = myLogHook topBar bottomBar
+        , logHook            = myLogHook defaultConfig topBar bottomBar
         , startupHook        = myStartupHook
         , mouseBindings      = myMouseBindings
         , manageHook         = myManageHook defaultConfig
@@ -146,17 +146,17 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 myTopBar    = "/usr/bin/xmobar " ++ home ++ "xmobar-top"
 myBottomBar = "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
 
-myLogHook u d = return ()
+myLogHook c u d = logHook c
 
-    >> -- top status bar
-    dynamicLogWithPP defaultPP
+    -- top status bar
+    <+> dynamicLogWithPP defaultPP
         { ppOutput   = hPutStrLn u
         , ppOrder    = \(ws:l:t:_) -> [t]
         , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  "
         }
 
-    >> -- bottom status bar
-    dynamicLogWithPP defaultPP
+    -- bottom status bar
+    <+> dynamicLogWithPP defaultPP
         { ppOutput   = hPutStrLn d
         , ppOrder    = \(ws:l:t:_) -> [l,ws]
         , ppSep      = " "
