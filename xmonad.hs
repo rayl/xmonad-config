@@ -1,3 +1,4 @@
+import Data.Char (toUpper)
 import qualified Data.Map as M
 import System.Exit
 import System.IO
@@ -163,7 +164,7 @@ myLogHook c u d = logHook c
         , ppSep      = " "
         , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
         , ppWsSep    = " "
-        , ppCurrent  = xmobarColor "black"  "yellow"
+        , ppCurrent  = xmobarColor "black"  "yellow" . map toUpper
         , ppHidden   = xmobarColor "white"  ""
         , ppUrgent   = xmobarColor "red"    "yellow"
         }
