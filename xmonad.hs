@@ -21,15 +21,15 @@ import XMonad.Util.Run(spawnPipe)
 home = "/home/local/.xmonad/"
 
 main = do
-    barUp   <- spawnPipe $ "/usr/bin/xmobar " ++ home ++ "xmobar-top"
-    barDown <- spawnPipe $ "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
+    topBar    <- spawnPipe myTopBar
+    bottomBar <- spawnPipe myBottomBar
     xmonad $ ewmh $ defaultConfig
         { borderWidth        = 2
         , workspaces         = myWorkspaces
         , layoutHook         = myLayoutHook
         , modMask            = myModMask
         , keys               = myKeys
-        , logHook            = myLogHook barUp barDown
+        , logHook            = myLogHook topBar bottomBar
         , startupHook        = myStartupHook
         , mouseBindings      = myMouseBindings
         , manageHook         = myManageHook defaultConfig
@@ -143,6 +143,9 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 ------------------------------------------------------------------------
 -- LOGGING
 ------------------------------------------------------------------------
+myTopBar    = "/usr/bin/xmobar " ++ home ++ "xmobar-top"
+myBottomBar = "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
+
 myLogHook u d = return ()
 
     >> -- top status bar
