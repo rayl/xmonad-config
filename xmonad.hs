@@ -93,6 +93,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         , ((modm, xK_t       ), withFocused $ windows . W.sink)
         , ((modm, xK_u       ), prevWS)
         , ((modm, xK_i       ), toggleWS)
+        , ((modS, xK_i       ), toggleOrView "1-goog")
         , ((modm, xK_o       ), nextWS)
 
         , ((modm, xK_a       ), spawn $ XMonad.terminal conf)
