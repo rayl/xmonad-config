@@ -28,23 +28,12 @@ main = do
         , layoutHook         = myLayoutHook
         , modMask            = myModMask
         , keys               = myKeys
-        , logHook            = dynamicLogWithPP defaultPP
-                                 { ppOutput               = hPutStrLn xmproc
-                                 , ppOrder                = \(ws:l:t:_) -> [l,ws,t]
-                                 , ppSep                  = " "
-                                 , ppLayout               = xmobarColor "black"  "#ccc"   . wrap "<" ">"
-                                 , ppWsSep                = " "
-                                 , ppCurrent              = xmobarColor "black"  "yellow" . shorten 9
-                                 , ppHidden               = xmobarColor "white"  ""       . shorten 9
-                                 , ppTitle                = xmobarColor "black"  "green"  . shorten 70 . wrap " " " "
-                                 , ppUrgent               = xmobarColor "red"    "yellow"
-                                 }
-        , startupHook        = setDefaultCursor xC_left_ptr
+        , logHook            = myLogHook xmproc
+        , startupHook        = myStartupHook
         , mouseBindings      = myMouseBindings
-        , manageHook         = manageHook defaultConfig <+> manageDocks
-        , handleEventHook    = handleEventHook defaultConfig <+> docksEventHook <+> fullscreenEventHook
+        , manageHook         = myManageHook defaultConfig
+        , handleEventHook    = myHandleEventHook defaultConfig
         }
-
 
 ------------------------------------------------------------------------
 -- WORKSPACES
@@ -67,6 +56,21 @@ myLayouts = named "3COL" (multiCol [1,1] 8 0.01 0.33)
 myTransforms = smartBorders
              . avoidStruts
              . mkToggle (single NBFULL)
+
+
+------------------------------------------------------------------------
+-- MANAGE
+------------------------------------------------------------------------
+myManageHook c =  manageHook c
+              <+> manageDocks
+
+
+------------------------------------------------------------------------
+-- EVENTS
+------------------------------------------------------------------------
+myHandleEventHook c =  handleEventHook c
+                   <+> docksEventHook
+                   <+> fullscreenEventHook
 
 ------------------------------------------------------------------------
 -- BINDINGS
@@ -133,3 +137,26 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
         , ((modm, button4), (\_ -> prevWS))
         , ((modm, button5), (\_ -> nextWS))
         ]
+
+
+------------------------------------------------------------------------
+-- LOGGING
+------------------------------------------------------------------------
+myLogHook pipe = dynamicLogWithPP defaultPP
+        { ppOutput   = hPutStrLn pipe
+        , ppOrder    = \(ws:l:t:_) -> [l,ws,t]
+        , ppSep      = " "
+        , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
+        , ppWsSep    = " "
+        , ppCurrent  = xmobarColor "black"  "yellow" . shorten 9
+        , ppHidden   = xmobarColor "white"  ""       . shorten 9
+        , ppTitle    = xmobarColor "black"  "green"  . shorten 70 . wrap " " " "
+        , ppUrgent   = xmobarColor "red"    "yellow"
+        }
+
+
+------------------------------------------------------------------------
+-- STARTUP
+------------------------------------------------------------------------
+myStartupHook = setDefaultCursor xC_left_ptr
+
