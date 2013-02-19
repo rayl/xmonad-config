@@ -122,10 +122,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         ++
         [((modm .|. m, k), windows $ f i)
                 | (i, k) <- zip (workspaces conf) [xK_1..]
-                , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
-        ++
-        [((modC, k), windows $ swapWithCurrent i)
-                | (i, k) <- zip (workspaces conf) [xK_1..]]
+                , (f, m) <- [(W.greedyView,0), (W.shift,shiftMask), (swapWithCurrent,controlMask)]]
         ++
         [((modm .|. m, k), screenWorkspace sc >>= flip whenJust (windows . f))
                 | (k, sc) <- zip [xK_w, xK_e, xK_r] [0..]
