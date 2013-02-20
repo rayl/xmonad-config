@@ -113,7 +113,7 @@ myKeys conf = mkKeymap conf $ concat
 
 tableKeys conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "<grave>"      toggleWorkspace  __               __               __
+  [ k "`"            toggleWorkspace  __               __               __
   , k "-"            __               __               __               __
   , k "<Backspace>"  __               __               __               __
 
