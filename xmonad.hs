@@ -97,6 +97,7 @@ myManageHook :: XConfig l -> ManageHook
 myManageHook c =  myManageHooks
               <+> manageDocks
 
+myManageHooks :: ManageHook
 myManageHooks = composeAll
     [ className =? "Gimp"             --> unfloat
     , className =? "foo"              --> unfloat
