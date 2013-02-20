@@ -50,6 +50,7 @@ main = do
         , handleEventHook    = myHandleEventHook defaultConfig
         }
 
+
 ------------------------------------------------------------------------
 -- DECORATION
 ------------------------------------------------------------------------
@@ -61,6 +62,7 @@ myNormalBorderColor = "#222"
 
 myFocusedBorderColor :: String
 myFocusedBorderColor = "#ff4"
+
 
 ------------------------------------------------------------------------
 -- WORKSPACES
@@ -110,6 +112,7 @@ myHandleEventHook :: XConfig l -> (Event -> X All)
 myHandleEventHook c =  handleEventHook c
                    <+> docksEventHook
                    <+> fullscreenEventHook
+
 
 ------------------------------------------------------------------------
 -- BINDINGS
@@ -208,7 +211,6 @@ tableKeys conf = concat
         ]
     bind mod key cmd = (mod ++ key, cmd)
 
-
 workspaceKeys :: [(String, X ())]
 workspaceKeys =
    [(mod ++ key, windows $ cmd tag)
@@ -220,7 +222,6 @@ screenKeys =
    [(mod ++ key, screenWorkspace scr >>= flip whenJust (windows . cmd))
        | (key, scr) <- zip ["w", "e", "r"] [0..]
        , (cmd, mod) <- [(W.view, "M-"), (W.shift, "M-S-")]]
-
 
 -- Mouse bindings
 myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
@@ -236,12 +237,6 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 ------------------------------------------------------------------------
 -- LOGGING
 ------------------------------------------------------------------------
-myTopBar :: String
-myTopBar    = "/usr/bin/xmobar " ++ home ++ "xmobar-top"
-
-myBottomBar :: String
-myBottomBar = "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
-
 myLogHook :: XConfig l -> Handle -> Handle -> X ()
 myLogHook c u d = logHook c
 
@@ -269,9 +264,17 @@ myLogHook c u d = logHook c
                Just i  -> i ++ "-" ++ x
                Nothing -> x
 
+myTopBar :: String
+myTopBar    = "/usr/bin/xmobar " ++ home ++ "xmobar-top"
+
+myBottomBar :: String
+myBottomBar = "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
+
+
 ------------------------------------------------------------------------
 -- STARTUP
 ------------------------------------------------------------------------
 myStartupHook :: X ()
 myStartupHook =  setDefaultCursor xC_left_ptr
              <+> setWMName "LG3D"
+
