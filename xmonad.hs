@@ -24,6 +24,7 @@ import XMonad.Layout.ResizableTile
 import XMonad.Prompt
 import qualified XMonad.StackSet as W
 import XMonad.Util.Cursor
+import XMonad.Util.EZConfig (mkKeymap)
 import XMonad.Util.Run(spawnPipe)
 
 home = "/home/local/.xmonad/"
@@ -102,67 +103,129 @@ myHandleEventHook c =  handleEventHook c
 ------------------------------------------------------------------------
 -- BINDINGS
 ------------------------------------------------------------------------
-modm = mod4Mask
-modS = modm .|. shiftMask
-modC = modm .|. controlMask
+myModMask = mod4Mask
 
-myModMask = modm
+myKeys conf = mkKeymap conf $ concat $ table conf
 
--- Key bindings
-myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
-	[ ((modm, xK_grave   ), toggleWS)
-        , ((modm, xK_q       ), restart "xmonad" True)
-        , ((modS, xK_q       ), io (exitWith ExitSuccess))
-        , ((modm, xK_t       ), withFocused $ windows . W.sink)
-        , ((modm, xK_u       ), prevWS)
-        , ((modm, xK_i       ), toggleOrView "goog")
-        , ((modm, xK_o       ), nextWS)
+table conf =
+--  key              M-               M-S-             M-C-             M-S-C-
+  [ k "<grave>"      toggleWorkspace  __               __               __
+  , k "-"            __               __               __               __
+  , k "<Backspace>"  __               __               __               __
 
-        , ((modm, xK_a       ), spawn $ XMonad.terminal conf)
-        , ((modS, xK_a       ), spawn "dmenu_run")
-        , ((modm, xK_s       ), promptSearch defaultXPConfig google)
-        , ((modS, xK_s       ), selectSearch google)
-        , ((modm, xK_d       ), gotoMenu)
-        , ((modS, xK_d       ), bringMenu)
-        , ((modm, xK_h       ), sendMessage Shrink)
-        , ((modS, xK_h       ), sendMessage ShrinkSlave)
-        , ((modm, xK_j       ), windows W.focusDown)
-        , ((modS, xK_j       ), windows W.swapDown)
-        , ((modm, xK_k       ), windows W.focusUp)
-        , ((modS, xK_k       ), windows W.swapUp)
-        , ((modm, xK_l       ), sendMessage Expand)
-        , ((modS, xK_l       ), sendMessage ExpandSlave)
-        , ((modm, xK_Return  ), windows W.swapMaster)
-        , ((modS, xK_Return  ), windows W.shiftMaster)
+  , k "q"            restartXmonad    quitXmonad       __               __
+  , k "w"            __               __               __               __
+  , k "e"            __               __               __               __
+  , k "r"            __               __               __               __
+  , k "t"            sinkWindow       __               __               __
+  , k "y"            __               __               __               __
+  , k "u"            prevWorkspace    __               __               __
+  , k "i"            googleWorkspace  __               __               __
+  , k "o"            nextWorkspace    __               __               __
+  , k "p"            __               __               __               __
 
-        , ((modm, xK_n       ), refresh)
-        , ((modm, xK_m       ), windows W.focusMaster)
-        , ((modm, xK_comma   ), sendMessage (IncMasterN 1))
-        , ((modm, xK_period  ), sendMessage (IncMasterN (-1)))
+  , k "a"            openTerminal     openDmenu        __               __
+  , k "s"            searchPrompt     searchSelection  __               __
+  , k "d"            gotoMenu'        bringMenu'       __               __
+  , k "f"            __               __               __               __
+  , k "g"            __               __               __               __
+  , k "h"            shrinkMaster     shrinkSlave      __               __
+  , k "j"            focusDown        swapDown         __               __
+  , k "k"            focusUp          swapUp           __               __
+  , k "l"            expandMaster     expandSlave      __               __
+  , k "<Return>"     swapMaster       shiftMaster      __               __
 
-        , ((modm, xK_z       ), sendMessage (Toggle NBFULL))
-        , ((modS, xK_z       ), kill)
-        , ((modm, xK_x       ), sendMessage ToggleStruts)
-        , ((modm, xK_space   ), sendMessage NextLayout)
-        , ((modS, xK_space   ), setLayout $ XMonad.layoutHook conf)
+  , k "z"            fullscreen       closeWindow      __               __
+  , k "x"            toggleStruts     __               __               __
+  , k "c"            __               __               __               __
+  , k "v"            __               __               __               __
+  , k "b"            __               __               __               __
+  , k "n"            refresh'         __               __               __
+  , k "m"            focusMaster      __               __               __
+  , k "<comma>"      incMaster        __               __               __
+  , k "<period>"     decMaster        __               __               __
+
+  , k "<Space>"      __               __               __               __
+  ]
+  where
+    k key m ms mc msc =
+        [ bind "M-"      key m
+        , bind "M-S-"    key ms
+        , bind "M-C-"    key mc
+        , bind "M-S-C-"  key msc
         ]
-        ++
-        [((modm .|. m, k), windows $ f i)
-                | (i, k) <- zip (workspaces conf) [xK_1..]
-                , (f, m) <- [(W.greedyView,0), (W.shift,shiftMask), (swapWithCurrent,controlMask)]]
-        ++
-        [((modm .|. m, k), screenWorkspace sc >>= flip whenJust (windows . f))
-                | (k, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-                , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+    bind mod key cmd = (mod ++ key, cmd)
+
+    __               = return ()
+
+    --------------------------------------------------------------------
+    -- xmonad
+    restartXmonad    = restart "xmonad" True
+    quitXmonad       = io $ exitWith ExitSuccess
+
+    --------------------------------------------------------------------
+    -- screen
+
+    --------------------------------------------------------------------
+    -- workspace
+    nextWorkspace    = nextWS
+    prevWorkspace    = prevWS
+    toggleWorkspace  = toggleWS
+    googleWorkspace  = toggleOrView "goog"
+
+    --------------------------------------------------------------------
+    -- layout
+    refresh'         = refresh
+    resetLayout      = setLayout $ layoutHook conf
+    nextLayout       = sendMessage NextLayout
+    fullscreen       = sendMessage $ Toggle NBFULL
+    toggleStruts     = sendMessage ToggleStruts
+
+    expandMaster     = sendMessage Expand
+    shrinkMaster     = sendMessage Shrink
+    expandSlave      = sendMessage ExpandSlave
+    shrinkSlave      = sendMessage ShrinkSlave
+    incMaster        = sendMessage (IncMasterN 1)
+    decMaster        = sendMessage (IncMasterN (-1))
+    closeWindow      = kill
+    sinkWindow       = withFocused $ windows . W.sink
+
+    gotoMenu'        = gotoMenu
+    bringMenu'       = bringMenu
+
+    focusDown        = windows W.focusDown
+    swapDown         = windows W.swapDown
+    focusUp          = windows W.focusUp
+    swapUp           = windows W.swapUp
+    swapMaster       = windows W.swapMaster
+    shiftMaster      = windows W.shiftMaster
+    focusMaster      = windows W.focusMaster
+
+    --------------------------------------------------------------------
+    -- tools
+    openTerminal     = spawn $ terminal conf
+    openDmenu        = spawn "dmenu_run"
+    searchPrompt     = promptSearch defaultXPConfig google
+    searchSelection  = selectSearch google
+
+    -- workspace shortcuts
+    --  [((modm .|. m, k), windows $ f i)
+    --          | (i, k) <- zip (workspaces conf) [xK_1..]
+    --          , (f, m) <- [(W.greedyView,0), (W.shift,shiftMask), (swapWithCurrent,controlMask)]]
+
+    -- screen switching (need multihead to test)
+    -- [((modm .|. m, k), screenWorkspace sc >>= flip whenJust (windows . f))
+    --         | (k, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+    --         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 
 
 -- Mouse bindings
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
-        [ ((modm, button1), (\w -> focus w >> windows W.shiftMaster))
-        , ((modm, button2), (\w -> focus w))
-        , ((modm, button3), (\w -> focus w))
-        , ((modm, button4), (\_ -> prevWS))
-        , ((modm, button5), (\_ -> nextWS))
+        [ ((myModMask, button1), (\w -> focus w >> windows W.shiftMaster))
+        , ((myModMask, button2), (\w -> focus w))
+        , ((myModMask, button3), (\w -> focus w))
+        , ((myModMask, button4), (\_ -> prevWS))
+        , ((myModMask, button5), (\_ -> nextWS))
         ]
 
 
