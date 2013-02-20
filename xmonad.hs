@@ -134,8 +134,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         , ((modm, xK_period  ), sendMessage (IncMasterN (-1)))
 
         , ((modm, xK_z       ), sendMessage (Toggle NBFULL))
+        , ((modS, xK_z       ), kill)
         , ((modm, xK_x       ), sendMessage ToggleStruts)
-        , ((modS, xK_c       ), kill)
         , ((modm, xK_space   ), sendMessage NextLayout)
         , ((modS, xK_space   ), setLayout $ XMonad.layoutHook conf)
         ]
