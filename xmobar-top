@@ -2,8 +2,6 @@ Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
        , bgColor = "black"
        , fgColor = "grey"
        , position = Top
-       , border = BottomB
-       , lowerOnStart = True
        , commands = [ Run StdinReader
                     , Run Date "%a %Y-%m-%d %H:%M:%S" "date" 10
                     ]
