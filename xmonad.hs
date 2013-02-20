@@ -105,10 +105,14 @@ myHandleEventHook c =  handleEventHook c
 ------------------------------------------------------------------------
 myModMask = mod4Mask
 
-myKeys conf = mkKeymap conf $ concat $ table conf
+myKeys conf = mkKeymap conf $ concat
+                [ tableKeys conf
+                , screenKeys
+                , workspaceKeys
+                ]
 
-table conf =
---  key              M-               M-S-             M-C-             M-S-C-
+tableKeys conf = concat
+  --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "<grave>"      toggleWorkspace  __               __               __
   , k "-"            __               __               __               __
   , k "<Backspace>"  __               __               __               __
@@ -208,15 +212,15 @@ table conf =
     searchPrompt     = promptSearch defaultXPConfig google
     searchSelection  = selectSearch google
 
-    -- workspace shortcuts
-    --  [((modm .|. m, k), windows $ f i)
-    --          | (i, k) <- zip (workspaces conf) [xK_1..]
-    --          , (f, m) <- [(W.greedyView,0), (W.shift,shiftMask), (swapWithCurrent,controlMask)]]
+workspaceKeys =
+   [(mod ++ key, windows $ cmd tag)
+       | (tag, key) <- zip myWorkspaces $ map show [1..]
+       , (cmd, mod) <- [(W.greedyView,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
 
-    -- screen switching (need multihead to test)
-    -- [((modm .|. m, k), screenWorkspace sc >>= flip whenJust (windows . f))
-    --         | (k, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-    --         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+screenKeys =
+   [(mod ++ key, screenWorkspace scr >>= flip whenJust (windows . cmd))
+       | (key, scr) <- zip ["w", "e", "r"] [0..]
+       , (cmd, mod) <- [(W.view, "M-"), (W.shift, "M-S-")]]
 
 
 -- Mouse bindings
