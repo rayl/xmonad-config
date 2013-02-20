@@ -131,7 +131,7 @@ myKeys conf = mkKeymap conf $ concat
 tableKeys :: XConfig l -> [(String, X ())]
 tableKeys conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "`"            toggleWorkspace  __               __               __
+  [ k "`"            lastWorkspace    __               __               __
   , k "-"            __               __               __               __
   , k "<Backspace>"  __               __               __               __
 
@@ -167,7 +167,7 @@ tableKeys conf = concat
   , k "<comma>"      incMaster        __               __               __
   , k "<period>"     decMaster        __               __               __
 
-  , k "<Space>"      __               __               __               __
+  , k "<Space>"      nextLayout       __               __               __
   ]
   where
     __               = return ()
@@ -175,7 +175,7 @@ tableKeys conf = concat
     quitXmonad       = io $ exitWith ExitSuccess
     nextWorkspace    = nextWS
     prevWorkspace    = prevWS
-    toggleWorkspace  = toggleWS
+    lastWorkspace    = toggleWS
     googleWorkspace  = toggleOrView "goog"
     refresh'         = refresh
     --resetLayout      = setLayout $ layoutHook conf
