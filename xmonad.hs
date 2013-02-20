@@ -56,9 +56,7 @@ myFocusedBorderColor = "#ff4"
 ------------------------------------------------------------------------
 -- WORKSPACES
 ------------------------------------------------------------------------
-myWorkspaces = zipWith (\n l -> show n ++ "-" ++ l)
-               [1..9]
-               ["goog","todo","book","read","hask","gimp","*","*","mp3s"]
+myWorkspaces = ["goog","todo","book","read","hask","gimp","mp3s"]
 
 
 ------------------------------------------------------------------------
@@ -67,7 +65,7 @@ myWorkspaces = zipWith (\n l -> show n ++ "-" ++ l)
 myLayoutHook = avoidStruts
              $ smartBorders
              $ mkToggle (single NBFULL)
-             $ onWorkspace "6-gimp" l_GIMP
+             $ onWorkspace "gimp" l_GIMP
              $ l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
 
 l_3COL = named "3COL" $ multiCol [1,1] 8 0.01 0.33
@@ -117,7 +115,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         , ((modS, xK_q       ), io (exitWith ExitSuccess))
         , ((modm, xK_t       ), withFocused $ windows . W.sink)
         , ((modm, xK_u       ), prevWS)
-        , ((modm, xK_i       ), toggleOrView "1-goog")
+        , ((modm, xK_i       ), toggleOrView "goog")
         , ((modm, xK_o       ), nextWS)
 
         , ((modm, xK_a       ), spawn $ XMonad.terminal conf)
@@ -190,11 +188,15 @@ myLogHook c u d = logHook c
         , ppSep      = " "
         , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
         , ppWsSep    = " "
-        , ppCurrent  = xmobarColor "black"  "yellow" . map toUpper
-        , ppHidden   = xmobarColor "white"  ""
+        , ppCurrent  = xmobarColor "black"  "yellow" . map toUpper . shortcut
+        , ppHidden   = xmobarColor "white"  "" . shortcut
         , ppUrgent   = xmobarColor "red"    "yellow"
         }
-
+        where
+           labels = M.fromList $ zip myWorkspaces (map show [1..])
+           shortcut x = case (M.lookup x labels) of
+               Just i  -> i ++ "-" ++ x
+               Nothing -> x
 
 ------------------------------------------------------------------------
 -- STARTUP
