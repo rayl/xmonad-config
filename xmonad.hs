@@ -58,7 +58,7 @@ myFocusedBorderColor = "#ff4"
 ------------------------------------------------------------------------
 myWorkspaces = zipWith (\n l -> show n ++ "-" ++ l)
                [1..9]
-               ["goog","todo","book","hask","gimp","*","*","*","mp3s"]
+               ["goog","todo","book","read","hask","gimp","*","*","mp3s"]
 
 
 ------------------------------------------------------------------------
@@ -67,7 +67,7 @@ myWorkspaces = zipWith (\n l -> show n ++ "-" ++ l)
 myLayoutHook = avoidStruts
              $ smartBorders
              $ mkToggle (single NBFULL)
-             $ onWorkspace "5-gimp" l_GIMP
+             $ onWorkspace "6-gimp" l_GIMP
              $ l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
 
 l_3COL = named "3COL" $ multiCol [1,1] 8 0.01 0.33
