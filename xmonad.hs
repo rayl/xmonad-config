@@ -1,5 +1,6 @@
 import Data.Char (toUpper)
 import qualified Data.Map as M
+import Data.Monoid
 import System.Exit
 import System.IO
 import XMonad
@@ -27,8 +28,10 @@ import XMonad.Util.Cursor
 import XMonad.Util.EZConfig (mkKeymap)
 import XMonad.Util.Run(spawnPipe)
 
+home :: String
 home = "/home/local/.xmonad/"
 
+main :: IO ()
 main = do
     topBar    <- spawnPipe myTopBar
     bottomBar <- spawnPipe myBottomBar
@@ -50,13 +53,19 @@ main = do
 ------------------------------------------------------------------------
 -- DECORATION
 ------------------------------------------------------------------------
+myBorderWidth :: Dimension
 myBorderWidth = 2
+
+myNormalBorderColor :: String
 myNormalBorderColor = "#222"
+
+myFocusedBorderColor :: String
 myFocusedBorderColor = "#ff4"
 
 ------------------------------------------------------------------------
 -- WORKSPACES
 ------------------------------------------------------------------------
+myWorkspaces :: [WorkspaceId]
 myWorkspaces = ["goog","todo","book","read","hask","gimp","mp3s"]
 
 
@@ -82,6 +91,7 @@ l_GIMP = named "GIMP" $ withIM (0.15) (Role "gimp-toolbox")
 ------------------------------------------------------------------------
 -- MANAGE
 ------------------------------------------------------------------------
+myManageHook :: XConfig l -> ManageHook
 myManageHook c =  myManageHooks
               <+> manageDocks
 
@@ -96,6 +106,7 @@ myManageHooks = composeAll
 ------------------------------------------------------------------------
 -- EVENTS
 ------------------------------------------------------------------------
+myHandleEventHook :: XConfig l -> (Event -> X All)
 myHandleEventHook c =  handleEventHook c
                    <+> docksEventHook
                    <+> fullscreenEventHook
@@ -103,14 +114,17 @@ myHandleEventHook c =  handleEventHook c
 ------------------------------------------------------------------------
 -- BINDINGS
 ------------------------------------------------------------------------
+myModMask :: KeyMask
 myModMask = mod4Mask
 
+myKeys :: XConfig l -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf = mkKeymap conf $ concat
                 [ tableKeys conf
                 , screenKeys
                 , workspaceKeys
                 ]
 
+tableKeys :: XConfig l -> [(String, X ())]
 tableKeys conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "`"            toggleWorkspace  __               __               __
@@ -160,7 +174,7 @@ tableKeys conf = concat
     toggleWorkspace  = toggleWS
     googleWorkspace  = toggleOrView "goog"
     refresh'         = refresh
-    resetLayout      = setLayout $ layoutHook conf
+    --resetLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
     fullscreen       = sendMessage $ Toggle NBFULL
     toggleStruts     = sendMessage ToggleStruts
@@ -195,11 +209,13 @@ tableKeys conf = concat
     bind mod key cmd = (mod ++ key, cmd)
 
 
+workspaceKeys :: [(String, X ())]
 workspaceKeys =
    [(mod ++ key, windows $ cmd tag)
        | (tag, key) <- zip myWorkspaces $ map show [1..]
        , (cmd, mod) <- [(W.greedyView,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
 
+screenKeys :: [(String, X ())]
 screenKeys =
    [(mod ++ key, screenWorkspace scr >>= flip whenJust (windows . cmd))
        | (key, scr) <- zip ["w", "e", "r"] [0..]
@@ -207,6 +223,7 @@ screenKeys =
 
 
 -- Mouse bindings
+myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
         [ ((myModMask, button1), (\w -> focus w >> windows W.shiftMaster))
         , ((myModMask, button2), (\w -> focus w))
@@ -219,9 +236,13 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 ------------------------------------------------------------------------
 -- LOGGING
 ------------------------------------------------------------------------
+myTopBar :: String
 myTopBar    = "/usr/bin/xmobar " ++ home ++ "xmobar-top"
+
+myBottomBar :: String
 myBottomBar = "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
 
+myLogHook :: XConfig l -> Handle -> Handle -> X ()
 myLogHook c u d = logHook c
 
     -- top status bar
@@ -251,5 +272,6 @@ myLogHook c u d = logHook c
 ------------------------------------------------------------------------
 -- STARTUP
 ------------------------------------------------------------------------
+myStartupHook :: X ()
 myStartupHook =  setDefaultCursor xC_left_ptr
              <+> setWMName "LG3D"
