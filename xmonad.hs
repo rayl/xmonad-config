@@ -32,9 +32,11 @@ main = do
     topBar    <- spawnPipe myTopBar
     bottomBar <- spawnPipe myBottomBar
     xmonad $ ewmh $ defaultConfig
-        { borderWidth        = 2
+        { borderWidth        = myBorderWidth
         , workspaces         = myWorkspaces
         , layoutHook         = myLayoutHook
+        , normalBorderColor  = myNormalBorderColor
+        , focusedBorderColor = myFocusedBorderColor
         , modMask            = myModMask
         , keys               = myKeys
         , logHook            = myLogHook defaultConfig topBar bottomBar
@@ -43,6 +45,13 @@ main = do
         , manageHook         = myManageHook defaultConfig
         , handleEventHook    = myHandleEventHook defaultConfig
         }
+
+------------------------------------------------------------------------
+-- DECORATION
+------------------------------------------------------------------------
+myBorderWidth = 2
+myNormalBorderColor = "#222"
+myFocusedBorderColor = "#ff4"
 
 ------------------------------------------------------------------------
 -- WORKSPACES
