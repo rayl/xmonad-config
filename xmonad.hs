@@ -78,7 +78,7 @@ myManageHook c =  myManageHooks
               <+> manageDocks
 
 myManageHooks = composeAll
-    [ className =? "gimp"             --> unfloat
+    [ className =? "Gimp"             --> unfloat
     , className =? "foo"              --> unfloat
     ]
     where
