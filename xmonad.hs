@@ -11,12 +11,16 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.SetWMName
+import XMonad.Layout.IM
 import XMonad.Layout.MouseResizableTile
 import XMonad.Layout.MultiColumns
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.Named (named)
 import XMonad.Layout.NoBorders
+import XMonad.Layout.PerWorkspace
+import XMonad.Layout.Reflect
+import XMonad.Layout.ResizableTile
 import XMonad.Prompt
 import qualified XMonad.StackSet as W
 import XMonad.Util.Cursor
@@ -45,29 +49,40 @@ main = do
 ------------------------------------------------------------------------
 myWorkspaces = zipWith (\n l -> show n ++ "-" ++ l)
                [1..9]
-               ["goog","todo","book","hask","*","*","*","*","mp3s"]
+               ["goog","todo","book","hask","gimp","*","*","*","mp3s"]
 
 
 ------------------------------------------------------------------------
 -- LAYOUTS
 ------------------------------------------------------------------------
-myLayoutHook = myTransforms myLayouts
+myLayoutHook = avoidStruts
+             $ smartBorders
+             $ mkToggle (single NBFULL)
+             $ onWorkspace "5-gimp" l_GIMP
+             $ l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
 
-myLayouts = named "3COL" (multiCol [1,1] 8 0.01 0.33)
-        ||| named "2COL" (multiCol [1,2] 8 0.01 0.50)
-        ||| named "FULL" (Full)
-        ||| named "DRAG" (mouseResizableTile { draggerType = BordersDragger })
-
-myTransforms = smartBorders
-             . avoidStruts
-             . mkToggle (single NBFULL)
+l_3COL = named "3COL" $ multiCol [1,1] 8 0.01 0.33
+l_2COL = named "2COL" $ multiCol [1,2] 8 0.01 0.50
+l_FULL = named "FULL" $ Full
+l_DRAG = named "DRAG" $ mouseResizableTile { draggerType = BordersDragger }
+l_TALL = named "TALL" $ ResizableTall 2 (1/118) (11/20) [1]
+l_GIMP = named "GIMP" $ withIM (0.15) (Role "gimp-toolbox")
+                      $ reflectHoriz $ withIM (0.15) (Role "gimp-dock")
+                      $ l_TALL ||| l_FULL
 
 
 ------------------------------------------------------------------------
 -- MANAGE
 ------------------------------------------------------------------------
-myManageHook c =  manageHook c
+myManageHook c =  myManageHooks
               <+> manageDocks
+
+myManageHooks = composeAll
+    [ className =? "gimp"             --> unfloat
+    , className =? "foo"              --> unfloat
+    ]
+    where
+       unfloat = ask >>= doF . W.sink
 
 
 ------------------------------------------------------------------------
