@@ -152,39 +152,18 @@ tableKeys conf = concat
   , k "<Space>"      __               __               __               __
   ]
   where
-    k key m ms mc msc =
-        [ bind "M-"      key m
-        , bind "M-S-"    key ms
-        , bind "M-C-"    key mc
-        , bind "M-S-C-"  key msc
-        ]
-    bind mod key cmd = (mod ++ key, cmd)
-
     __               = return ()
-
-    --------------------------------------------------------------------
-    -- xmonad
     restartXmonad    = restart "xmonad" True
     quitXmonad       = io $ exitWith ExitSuccess
-
-    --------------------------------------------------------------------
-    -- screen
-
-    --------------------------------------------------------------------
-    -- workspace
     nextWorkspace    = nextWS
     prevWorkspace    = prevWS
     toggleWorkspace  = toggleWS
     googleWorkspace  = toggleOrView "goog"
-
-    --------------------------------------------------------------------
-    -- layout
     refresh'         = refresh
     resetLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
     fullscreen       = sendMessage $ Toggle NBFULL
     toggleStruts     = sendMessage ToggleStruts
-
     expandMaster     = sendMessage Expand
     shrinkMaster     = sendMessage Shrink
     expandSlave      = sendMessage ExpandSlave
@@ -193,10 +172,8 @@ tableKeys conf = concat
     decMaster        = sendMessage (IncMasterN (-1))
     closeWindow      = kill
     sinkWindow       = withFocused $ windows . W.sink
-
     gotoMenu'        = gotoMenu
     bringMenu'       = bringMenu
-
     focusDown        = windows W.focusDown
     swapDown         = windows W.swapDown
     focusUp          = windows W.focusUp
@@ -204,13 +181,19 @@ tableKeys conf = concat
     swapMaster       = windows W.swapMaster
     shiftMaster      = windows W.shiftMaster
     focusMaster      = windows W.focusMaster
-
-    --------------------------------------------------------------------
-    -- tools
     openTerminal     = spawn $ terminal conf
     openDmenu        = spawn "dmenu_run"
     searchPrompt     = promptSearch defaultXPConfig google
     searchSelection  = selectSearch google
+
+    k key m ms mc msc =
+        [ bind "M-"      key m
+        , bind "M-S-"    key ms
+        , bind "M-C-"    key mc
+        , bind "M-S-C-"  key msc
+        ]
+    bind mod key cmd = (mod ++ key, cmd)
+
 
 workspaceKeys =
    [(mod ++ key, windows $ cmd tag)
