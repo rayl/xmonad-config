@@ -171,7 +171,7 @@ tableKeys conf = concat
   , k "<comma>"      incMaster        __               __               __
   , k "<period>"     decMaster        __               __               __
 
-  , k "<Space>"      nextLayout       __               __               __
+  , k "<Space>"      nextLayout       firstLayout      __               __
   ]
   where
     __               = return ()
@@ -183,7 +183,7 @@ tableKeys conf = concat
     lastWorkspace    = toggleWS
     googleWorkspace  = toggleOrView "goog"
     refresh'         = refresh
-    --resetLayout      = setLayout $ layoutHook conf
+    firstLayout      = sendMessage FirstLayout
     nextLayout       = sendMessage NextLayout
     fullscreen       = sendMessage $ Toggle NBFULL
     toggleStruts     = sendMessage ToggleStruts
