@@ -96,7 +96,7 @@ myLayoutHook = avoidStruts
     m_GIMP x = renamed [CutWordsLeft 3]
              $ withIM (0.15) (Role "gimp-toolbox")
              . reflectHoriz
-             . (withIM (0.15) (Role "gimp-dock"))
+             . withIM (0.15) (Role "gimp-dock")
              $ x
 
     name x = renamed [Replace x]
