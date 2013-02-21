@@ -1,32 +1,36 @@
-import Data.Char (toUpper)
-import qualified Data.Map as M
-import Data.Monoid
-import System.Exit
-import System.IO
-import XMonad
-import XMonad.Actions.CycleWS (nextWS, prevWS, toggleWS, toggleOrView)
-import XMonad.Actions.Search
-import XMonad.Actions.SwapWorkspaces
-import XMonad.Actions.WindowBringer
-import XMonad.Hooks.DynamicLog
-import XMonad.Hooks.EwmhDesktops
-import XMonad.Hooks.ManageDocks
-import XMonad.Hooks.SetWMName
-import XMonad.Layout.IM
-import XMonad.Layout.MouseResizableTile
-import XMonad.Layout.MultiColumns
-import XMonad.Layout.MultiToggle
-import XMonad.Layout.MultiToggle.Instances
-import XMonad.Layout.Named (named)
-import XMonad.Layout.NoBorders
-import XMonad.Layout.PerWorkspace
-import XMonad.Layout.Reflect
-import XMonad.Layout.ResizableTile
-import XMonad.Prompt
-import qualified XMonad.StackSet as W
-import XMonad.Util.Cursor
-import XMonad.Util.EZConfig (mkKeymap)
-import XMonad.Util.Run(spawnPipe)
+
+import Data.Char                         (toUpper)
+import qualified Data.Map as M           (Map,fromList,lookup)
+import Data.Monoid                       (All)
+import System.Exit                       (exitWith,ExitCode(ExitSuccess))
+import System.IO                         (hPutStrLn, Handle)
+import XMonad                            -- many
+import XMonad.Actions.CycleWS            (nextWS, prevWS, toggleWS, toggleOrView)
+import XMonad.Actions.Search             (promptSearch,selectSearch,google)
+import XMonad.Actions.SwapWorkspaces     (swapWithCurrent)
+import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
+import XMonad.Hooks.DynamicLog           -- many
+import XMonad.Hooks.EwmhDesktops         (ewmh,fullscreenEventHook)
+import XMonad.Hooks.ManageDocks          (manageDocks,docksEventHook,
+                                          avoidStruts,ToggleStruts(..))
+import XMonad.Hooks.SetWMName            (setWMName)
+import XMonad.Layout.IM                  (withIM,Property(Role))
+import XMonad.Layout.MouseResizableTile  (mouseResizableTile, draggerType,
+                                          DraggerType(BordersDragger),
+                                          MRTMessage(ExpandSlave,ShrinkSlave))
+import XMonad.Layout.MultiColumns        (multiCol)
+import XMonad.Layout.MultiToggle         (mkToggle,single,Toggle(..))
+import XMonad.Layout.MultiToggle.Instances (StdTransformers(NBFULL))
+import XMonad.Layout.Named               (named)
+import XMonad.Layout.NoBorders           (smartBorders)
+import XMonad.Layout.PerWorkspace        (onWorkspace)
+import XMonad.Layout.Reflect             (reflectHoriz)
+import XMonad.Layout.ResizableTile       (ResizableTall(..))
+import XMonad.Prompt                     (defaultXPConfig)
+import qualified XMonad.StackSet as W    -- many
+import XMonad.Util.Cursor                (setDefaultCursor)
+import XMonad.Util.EZConfig              (mkKeymap)
+import XMonad.Util.Run                   (spawnPipe)
 
 home :: String
 home = "/home/local/.xmonad/"
