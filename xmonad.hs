@@ -20,7 +20,7 @@ import XMonad.Layout.MouseResizableTile  (mouseResizableTile, draggerType,
                                           MRTMessage(ExpandSlave,ShrinkSlave))
 import XMonad.Layout.MultiColumns        (multiCol)
 import XMonad.Layout.MultiToggle         (mkToggle,single,Toggle(..))
-import XMonad.Layout.MultiToggle.Instances (StdTransformers(NBFULL))
+import XMonad.Layout.MyTransformers      (MyTransformers(ZOOM))
 import XMonad.Layout.NoBorders           (smartBorders)
 import XMonad.Layout.PerWorkspace        (onWorkspace)
 import XMonad.Layout.Reflect             (reflectHoriz)
@@ -80,7 +80,7 @@ myWorkspaces = ["goog","todo","read","term","hask","gimp","book","mp3s"]
 ------------------------------------------------------------------------
 myLayoutHook = avoidStruts
              $ smartBorders
-             $ mkToggle (single NBFULL)
+             $ mkToggle (single ZOOM)
              $ onWorkspace "gimp" (gimpModify gimpLayouts)
              $ onWorkspace "term" termLayouts
              $ mainLayouts
@@ -195,7 +195,7 @@ tableKeys conf = concat
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
-    fullscreen       = sendMessage $ Toggle NBFULL
+    fullscreen       = sendMessage $ Toggle ZOOM
     toggleStruts     = sendMessage ToggleStruts
     expandMaster     = sendMessage Expand
     shrinkMaster     = sendMessage Shrink
