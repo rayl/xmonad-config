@@ -234,8 +234,10 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
         [ ((myModMask, button1), (\w -> focus w >> windows W.shiftMaster))
         , ((myModMask, button2), (\w -> focus w))
         , ((myModMask, button3), (\w -> focus w))
-        , ((myModMask, button4), (\_ -> prevWS))
-        , ((myModMask, button5), (\_ -> nextWS))
+        , ((myModMask, button4), (\_ -> windows W.focusUp))
+        , ((myModMask, button5), (\_ -> windows W.focusDown))
+        , ((myModMask .|. shiftMask, button4), (\_ -> prevWS))
+        , ((myModMask .|. shiftMask, button5), (\_ -> nextWS))
         ]
 
 
