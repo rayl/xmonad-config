@@ -72,7 +72,7 @@ myFocusedBorderColor = "#ff4"
 -- WORKSPACES
 ------------------------------------------------------------------------
 myWorkspaces :: [WorkspaceId]
-myWorkspaces = ["goog","todo","book","read","hask","gimp","mp3s"]
+myWorkspaces = ["goog","todo","read","term","hask","gimp","book","mp3s"]
 
 
 ------------------------------------------------------------------------
@@ -81,23 +81,26 @@ myWorkspaces = ["goog","todo","book","read","hask","gimp","mp3s"]
 myLayoutHook = avoidStruts
              $ smartBorders
              $ mkToggle (single NBFULL)
-             $ onWorkspace "gimp" (m_GIMP gimpLayouts)
+             $ onWorkspace "gimp" (gimpModify gimpLayouts)
+             $ onWorkspace "term" termLayouts
              $ mainLayouts
   where
-    gimpLayouts = l_TALL ||| l_FULL
+
     mainLayouts = l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
+    gimpLayouts = l_TALL ||| l_FULL
+    termLayouts = l_3COL ||| l_FULL
+
+    gimpModify x = renamed [CutWordsLeft 3]
+                 $ withIM (0.15) (Role "gimp-toolbox")
+                 $ reflectHoriz
+                 $ withIM (0.15) (Role "gimp-dock")
+                 $ x
 
     l_3COL = name "3COL" $ multiCol [1,1] 8 0.01 0.33
     l_2COL = name "2COL" $ multiCol [1,2] 8 0.01 0.50
     l_FULL = name "FULL" $ Full
     l_DRAG = name "DRAG" $ mouseResizableTile { draggerType = BordersDragger }
     l_TALL = name "TALL" $ ResizableTall 2 (1/118) (11/20) [1]
-
-    m_GIMP x = renamed [CutWordsLeft 3]
-             $ withIM (0.15) (Role "gimp-toolbox")
-             . reflectHoriz
-             . withIM (0.15) (Role "gimp-dock")
-             $ x
 
     name x = renamed [Replace x]
 
