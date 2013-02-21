@@ -96,11 +96,11 @@ myLayoutHook = avoidStruts
                  $ withIM (0.15) (Role "gimp-dock")
                  $ x
 
-    l_3COL = name "3COL" $ multiCol [1,1] 8 0.01 0.33
-    l_2COL = name "2COL" $ multiCol [1,2] 8 0.01 0.50
-    l_FULL = name "FULL" $ Full
-    l_DRAG = name "DRAG" $ mouseResizableTile { draggerType = BordersDragger }
-    l_TALL = name "TALL" $ ResizableTall 2 (1/118) (11/20) [1]
+    l_3COL = name "3col" $ multiCol [1,1] 8 0.01 0.33
+    l_2COL = name "2col" $ multiCol [1,2] 8 0.01 0.50
+    l_FULL = name "full" $ Full
+    l_DRAG = name "drag" $ mouseResizableTile { draggerType = BordersDragger }
+    l_TALL = name "tall" $ ResizableTall 2 (1/118) (11/20) [1]
 
     name x = renamed [Replace x]
 
