@@ -21,10 +21,10 @@ import XMonad.Layout.MouseResizableTile  (mouseResizableTile, draggerType,
 import XMonad.Layout.MultiColumns        (multiCol)
 import XMonad.Layout.MultiToggle         (mkToggle,single,Toggle(..))
 import XMonad.Layout.MultiToggle.Instances (StdTransformers(NBFULL))
-import XMonad.Layout.Named               (named)
 import XMonad.Layout.NoBorders           (smartBorders)
 import XMonad.Layout.PerWorkspace        (onWorkspace)
 import XMonad.Layout.Reflect             (reflectHoriz)
+import XMonad.Layout.Renamed             (renamed,Rename(Replace,CutWordsLeft))
 import XMonad.Layout.ResizableTile       (ResizableTall(..))
 import XMonad.Prompt                     (defaultXPConfig)
 import qualified XMonad.StackSet as W    -- many
@@ -81,18 +81,25 @@ myWorkspaces = ["goog","todo","book","read","hask","gimp","mp3s"]
 myLayoutHook = avoidStruts
              $ smartBorders
              $ mkToggle (single NBFULL)
-             $ onWorkspace "gimp" l_GIMP
-             $ l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
+             $ onWorkspace "gimp" (m_GIMP gimpLayouts)
+             $ mainLayouts
+  where
+    gimpLayouts = l_TALL ||| l_FULL
+    mainLayouts = l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
 
-l_3COL = named "3COL" $ multiCol [1,1] 8 0.01 0.33
-l_2COL = named "2COL" $ multiCol [1,2] 8 0.01 0.50
-l_FULL = named "FULL" $ Full
-l_DRAG = named "DRAG" $ mouseResizableTile { draggerType = BordersDragger }
-l_TALL = named "TALL" $ ResizableTall 2 (1/118) (11/20) [1]
-l_GIMP = named "GIMP" $ withIM (0.15) (Role "gimp-toolbox")
-                      $ reflectHoriz $ withIM (0.15) (Role "gimp-dock")
-                      $ l_TALL ||| l_FULL
+    l_3COL = name "3COL" $ multiCol [1,1] 8 0.01 0.33
+    l_2COL = name "2COL" $ multiCol [1,2] 8 0.01 0.50
+    l_FULL = name "FULL" $ Full
+    l_DRAG = name "DRAG" $ mouseResizableTile { draggerType = BordersDragger }
+    l_TALL = name "TALL" $ ResizableTall 2 (1/118) (11/20) [1]
 
+    m_GIMP x = renamed [CutWordsLeft 3]
+             $ withIM (0.15) (Role "gimp-toolbox")
+             . reflectHoriz
+             . (withIM (0.15) (Role "gimp-dock"))
+             $ x
+
+    name x = renamed [Replace x]
 
 ------------------------------------------------------------------------
 -- MANAGE
