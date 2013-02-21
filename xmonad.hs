@@ -132,14 +132,14 @@ myHandleEventHook c =  handleEventHook c
 myModMask :: KeyMask
 myModMask = mod4Mask
 
-myKeys :: XConfig l -> M.Map (KeyMask, KeySym) (X ())
+myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf = mkKeymap conf $ concat
                 [ tableKeys conf
                 , screenKeys
                 , workspaceKeys
                 ]
 
-tableKeys :: XConfig l -> [(String, X ())]
+tableKeys :: XConfig Layout -> [(String, X ())]
 tableKeys conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "`"            lastWorkspace    __               __               __
@@ -190,7 +190,7 @@ tableKeys conf = concat
     lastWorkspace    = toggleWS
     googleWorkspace  = toggleOrView "goog"
     refresh'         = refresh
-    firstLayout      = sendMessage FirstLayout
+    firstLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
     fullscreen       = sendMessage $ Toggle NBFULL
     toggleStruts     = sendMessage ToggleStruts
