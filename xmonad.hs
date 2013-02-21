@@ -175,8 +175,8 @@ tableKeys conf = concat
   , k "b"            __               __               __               __
   , k "n"            refresh'         __               __               __
   , k "m"            focusMaster      __               __               __
-  , k "<comma>"      incMaster        __               __               __
-  , k "<period>"     decMaster        __               __               __
+  , k ","            incMaster        __               __               __
+  , k "."            decMaster        __               __               __
 
   , k "<Space>"      nextLayout       firstLayout      __               __
   ]
