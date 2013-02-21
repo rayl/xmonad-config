@@ -139,7 +139,7 @@ tableKeys conf = concat
   , k "-"            __               __               __               __
   , k "<Backspace>"  __               __               __               __
 
-  , k "q"            restartXmonad    quitXmonad       __               __
+  , k "q"            restartXmonad    resetXmonad      __              quitXmonad
   , k "w"            __               __               __               __
   , k "e"            __               __               __               __
   , k "r"            __               __               __               __
@@ -176,6 +176,7 @@ tableKeys conf = concat
   where
     __               = return ()
     restartXmonad    = restart "xmonad" True
+    resetXmonad      = restart "xmonad" False
     quitXmonad       = io $ exitWith ExitSuccess
     nextWorkspace    = nextWS
     prevWorkspace    = prevWS
