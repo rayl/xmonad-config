@@ -132,18 +132,44 @@ myHandleEventHook c =  handleEventHook c
 ------------------------------------------------------------------------
 -- BINDINGS
 ------------------------------------------------------------------------
-myModMask :: KeyMask
-myModMask = mod4Mask
+myModMask   =   mod4Mask
+myKeyMaps   = [ keyboardMap, screenMap, workspaceMap ]
+myMouseMaps = [ mouseMap ] 
 
-myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf = mkKeymap conf $ concat
-                [ tableKeys conf
-                , screenKeys
-                , workspaceKeys
-                ]
 
-tableKeys :: XConfig Layout -> [(String, X ())]
-tableKeys conf = concat
+mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
+mouseMap conf = concat
+  --  button         M-               M-S-             M-C-             M-S-C-
+  [ k button1        shiftMaster      __               __               __
+  , k button2        focusWindow      __               __               __
+  , k button3        focusWindow      __               __               __
+  , k button4        focusUp          prevWorkspace    __               __
+  , k button5        focusDown        nextWorkspace    __               __
+  ] 
+  where
+    __               = (\_ -> return ())
+    nextWorkspace    = (\_ -> nextWS)
+    prevWorkspace    = (\_ -> prevWS)
+    focusDown        = (\_ -> windows W.focusDown)
+    focusUp          = (\_ -> windows W.focusUp)
+    shiftMaster      = (\w -> focus w >> windows W.shiftMaster)
+    focusWindow      = (\w -> focus w)
+
+    k key m ms mc msc =
+        [ bind m'    key m
+        , bind ms'   key ms
+        , bind mc'   key mc
+        , bind msc'  key msc
+        ]
+      where
+        bind mod key cmd = ((mod,key), cmd)
+        m'   = myModMask
+        ms'  = myModMask .|. shiftMask
+        mc'  = myModMask .|.               controlMask
+        msc' = myModMask .|. shiftMask .|. controlMask
+
+keyboardMap :: XConfig Layout -> [(String, X ())]
+keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "`"            lastWorkspace    __               __               __
   , k "-"            __               __               __               __
@@ -225,31 +251,26 @@ tableKeys conf = concat
         , bind "M-C-"    key mc
         , bind "M-S-C-"  key msc
         ]
-    bind mod key cmd = (mod ++ key, cmd)
+      where
+        bind mod key cmd = (mod ++ key, cmd)
 
-workspaceKeys :: [(String, X ())]
-workspaceKeys =
+workspaceMap :: XConfig l -> [(String, X ())]
+workspaceMap conf =
    [(mod ++ key, windows $ cmd tag)
        | (tag, key) <- zip myWorkspaces $ map show [1..]
        , (cmd, mod) <- [(W.greedyView,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
 
-screenKeys :: [(String, X ())]
-screenKeys =
+screenMap :: XConfig l -> [(String, X ())]
+screenMap conf =
    [(mod ++ key, screenWorkspace scr >>= flip whenJust (windows . cmd))
        | (key, scr) <- zip ["w", "e", "r"] [0..]
        , (cmd, mod) <- [(W.view, "M-"), (W.shift, "M-S-")]]
 
--- Mouse bindings
+myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
+myKeys conf = mkKeymap conf $ concat $ map ($ conf) myKeyMaps
+
 myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
-        [ ((myModMask, button1), (\w -> focus w >> windows W.shiftMaster))
-        , ((myModMask, button2), (\w -> focus w))
-        , ((myModMask, button3), (\w -> focus w))
-        , ((myModMask, button4), (\_ -> windows W.focusUp))
-        , ((myModMask, button5), (\_ -> windows W.focusDown))
-        , ((myModMask .|. shiftMask, button4), (\_ -> prevWS))
-        , ((myModMask .|. shiftMask, button5), (\_ -> nextWS))
-        ]
+myMouseBindings conf = M.fromList $ concat $ map ($ conf) myMouseMaps
 
 
 ------------------------------------------------------------------------
