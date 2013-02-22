@@ -147,13 +147,13 @@ mouseMap conf = concat
   , k button5        focusDown        nextWorkspace    __               __
   ] 
   where
-    __               = (\_ -> return ())
-    nextWorkspace    = (\_ -> nextWS)
-    prevWorkspace    = (\_ -> prevWS)
-    focusDown        = (\_ -> windows W.focusDown)
-    focusUp          = (\_ -> windows W.focusUp)
-    shiftMaster      = (\w -> focus w >> windows W.shiftMaster)
-    focusWindow      = (\w -> focus w)
+    __               = \_ -> return ()
+    nextWorkspace    = \_ -> nextWS
+    prevWorkspace    = \_ -> prevWS
+    focusDown        = \_ -> windows W.focusDown
+    focusUp          = \_ -> windows W.focusUp
+    shiftMaster      = \w -> focus w >> windows W.shiftMaster
+    focusWindow      = \w -> focus w
 
     k key m ms mc msc =
         [ bind m'    key m
