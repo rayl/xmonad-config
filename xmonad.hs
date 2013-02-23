@@ -143,8 +143,8 @@ mouseMap conf = concat
   [ k button1        shiftMaster      __               __               __
   , k button2        focusWindow      __               __               __
   , k button3        focusWindow      __               __               __
-  , k button4        focusUp          prevWorkspace    __               __
-  , k button5        focusDown        nextWorkspace    __               __
+  , k button4        focusUp          nextWorkspace    __               __
+  , k button5        focusDown        prevWorkspace    __               __
   ] 
   where
     __               = \_ -> return ()
