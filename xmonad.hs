@@ -73,7 +73,7 @@ myFocusedBorderColor = "#ff4"
 -- WORKSPACES
 ------------------------------------------------------------------------
 myWorkspaces :: [WorkspaceId]
-myWorkspaces = ["goog","todo","read","term","hask","gimp","book","mp3s"]
+myWorkspaces = ["dash","todo","news","book","tune"]
 
 
 ------------------------------------------------------------------------
@@ -182,8 +182,8 @@ keyboardMap conf = concat
   , k "r"            __               __               __               __
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
-  , k "i"            googleWorkspace  __               __               __
   , k "u"            prevWorkspace    toPrevWorkspace  __               __
+  , k "i"            dashWorkspace    __               __               __
   , k "o"            nextWorkspace    toNextWorkspace  __               __
   , k "p"            __               __               __               __
 
@@ -220,7 +220,7 @@ keyboardMap conf = concat
     toNextWorkspace  = shiftToNext
     toPrevWorkspace  = shiftToPrev
     lastWorkspace    = toggleWS
-    googleWorkspace  = toggleOrView "goog"
+    dashWorkspace    = toggleOrView "dash"
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
