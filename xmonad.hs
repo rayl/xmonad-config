@@ -5,7 +5,8 @@ import Data.Monoid                       (All)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
 import XMonad                            -- many
-import XMonad.Actions.CycleWS            (nextWS, prevWS, toggleWS, toggleOrView)
+import XMonad.Actions.CycleWS            (nextWS, prevWS, toggleWS, toggleOrView,
+                                          shiftToNext, shiftToPrev)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
 import XMonad.Actions.SwapWorkspaces     (swapWithCurrent)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
@@ -181,9 +182,9 @@ keyboardMap conf = concat
   , k "r"            __               __               __               __
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
-  , k "u"            prevWorkspace    __               __               __
   , k "i"            googleWorkspace  __               __               __
-  , k "o"            nextWorkspace    __               __               __
+  , k "u"            prevWorkspace    toPrevWorkspace  __               __
+  , k "o"            nextWorkspace    toNextWorkspace  __               __
   , k "p"            __               __               __               __
 
   , k "a"            openTerminal     openDmenu        __               __
@@ -216,6 +217,8 @@ keyboardMap conf = concat
     quitXmonad       = io $ exitWith ExitSuccess
     nextWorkspace    = nextWS
     prevWorkspace    = prevWS
+    toNextWorkspace  = shiftToNext
+    toPrevWorkspace  = shiftToPrev
     lastWorkspace    = toggleWS
     googleWorkspace  = toggleOrView "goog"
     refresh'         = refresh
