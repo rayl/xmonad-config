@@ -296,7 +296,7 @@ myLogHook c u d = logHook c
         , ppSep      = " "
         , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
         , ppWsSep    = " "
-        , ppCurrent  = xmobarColor "black"  "yellow" . map toUpper . shortcut
+        , ppCurrent  = xmobarColor "black"  "yellow" . map toUpper . wrap " " " " . shortcut
         , ppHidden   = xmobarColor "white"  "" . shortcut
         , ppUrgent   = xmobarColor "red"    "yellow"
         }
