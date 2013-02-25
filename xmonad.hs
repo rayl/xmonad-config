@@ -334,6 +334,41 @@ myMouseBindings conf = M.fromList $ concat $ map ($ conf) myMouseMaps
 ------------------------------------------------------------------------
 -- LOGGING
 ------------------------------------------------------------------------
+myTemplates :: Int -> Pos -> (String,String,String)
+myTemplates s p | p == T = headerTmpl
+                | p == B = footerTmpl
+   where
+      headerTmpl = 
+         ( xmobarColor "black" "lightblue" . wrap " " " " $ (show s)
+         , "%StdinReader%"
+         , "<fc=#ee9a00>%date%</fc>"
+         )
+      footerTmpl =
+         ( "%StdinReader%"
+         , ""
+         , "%multicpu% | %memory%%swap%"
+         )
+
+myCommands :: Int -> Pos -> [String]
+myCommands s p | p == T = headerCmds
+               | p == B = footerCmds
+   where
+      headerCmds = 
+         [ "Run StdinReader"
+         , "Run Date \"%a %Y-%m-%d %H:%M:%S\" \"date\" 10"
+         ]
+      footerCmds = 
+         [ "Run StdinReader"
+         , "Run MultiCpu [ \"-t\", \"CPU: <total>% (<user>%user, <nice>%nice, <system>%sys) [<autototal>]\",\
+                         \ \"-L\", \"3\",\
+                         \ \"-H\", \"50\",\
+                         \ \"--normal\", \"green\",\
+                         \ \"--high\",\"red\"\
+                         \ ] 10"
+         , "Run Memory   [\"-t\",\"MEM: <free>M free, <used>M used, \"] 10"
+         , "Run Swap     [\"-t\", \"<used>M swap\"] 10"
+         ]
+
 data Pos = T | B deriving (Eq)
 
 spawnBar :: Int -> Pos -> IO Handle
@@ -345,42 +380,14 @@ spawnBar s p = spawnPipe cmd
                         , pos
                         , "-a '}{'"
                         , "-s '%'"
-                        , "-t", fmtt template
-                        , "-c", fmtc commands
+                        , "-t", fmtt $ myTemplates s p
+                        , "-c", fmtc $ myCommands s p
                         , "-x" , show s
                         ]
-                    where fmtt [l,c,r] = wrap "'" "'" $ l ++ "}" ++ c ++ "{" ++ r
+                    where fmtt (l,c,r) = wrap "'" "'" $ l ++ "}" ++ c ++ "{" ++ r
                           fmtc x = wrap "'[ " " ]'" $ unwords $ L.intersperse "," x
                           pos | p == T = "-o"
                               | p == B = "-b"
-          template
-            | p == T =
-              [ xmobarColor "black" "lightblue" . wrap " " " " $ (show s)
-              , "%StdinReader%"
-              , "<fc=#ee9a00>%date%</fc>"
-              ]
-            | p == B =
-              [ "%StdinReader%"
-              , ""
-              , "%multicpu% | %memory%%swap%"
-              ]
-
-          commands
-            | p == T =
-              [ "Run StdinReader"
-              , "Run Date \"%a %Y-%m-%d %H:%M:%S\" \"date\" 10"
-              ]
-            | p == B =
-              [ "Run StdinReader"
-              , "Run MultiCpu [ \"-t\", \"CPU: <total>% (<user>%user, <nice>%nice, <system>%sys) [<autototal>]\",\
-                              \ \"-L\", \"3\",\
-                              \ \"-H\", \"50\",\
-                              \ \"--normal\", \"green\",\
-                              \ \"--high\",\"red\"\
-                              \ ] 10"
-              , "Run Memory [\"-t\",\"MEM: <free>M free, <used>M used, \"] 10"
-              , "Run Swap [\"-t\", \"<used>M swap\"] 10"
-              ]
 
 focusedTitleOnScreen :: ScreenId -> X (String -> String)
 focusedTitleOnScreen n = do
