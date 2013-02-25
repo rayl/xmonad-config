@@ -183,20 +183,26 @@ mouseMap conf = concat
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "`"            lastWorkspace    __               __               __
+  [ k "<Esc>"        __               __               __               __
+
+  , k "`"            lastWorkspace    __               __               __
+  -- see workspaceMap for number keys
   , k "-"            __               __               __               __
+  , k "="            __               __               __               __
   , k "<Backspace>"  __               __               __               __
 
+  , k "<Tab>"        __               __               __               __
   , k "q"            restartXmonad    resetXmonad      __              quitXmonad
---, k "w"            __               __               __               __
---, k "e"            __               __               __               __
---, k "r"            __               __               __               __
+  -- see screenMap for wer
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
   , k "u"            prevWorkspace    toPrevWorkspace  __               __
   , k "i"            dashWorkspace    __               __               __
   , k "o"            nextWorkspace    toNextWorkspace  __               __
   , k "p"            __               __               __               __
+  , k "["            __               __               __               __
+  , k "]"            __               __               __               __
+  , k "\\"           __               __               __               __
 
   , k "a"            openTerminal     openChrome       openDmenu        __
   , k "s"            searchPrompt     searchSelection  __               __
@@ -207,6 +213,8 @@ keyboardMap conf = concat
   , k "j"            focusDown        swapDown         __               __
   , k "k"            focusUp          swapUp           __               __
   , k "l"            expandMaster     expandSlave      __               __
+  , k ";"            __               __               __               __
+  , k "'"            __               __               __               __
   , k "<Return>"     swapMaster       shiftMaster      __               __
 
   , k "z"            fullscreen       closeWindow      __               __
@@ -218,8 +226,20 @@ keyboardMap conf = concat
   , k "m"            focusMaster      __               __               __
   , k ","            incMaster        __               __               __
   , k "."            decMaster        __               __               __
+  , k "/"            __               __               __               __
 
   , k "<Space>"      nextLayout       firstLayout      __               __
+
+  , k "<Home>"       __               __               __               __
+  , k "<End>"        __               __               __               __
+  , k "<Delete>"     __               __               __               __
+  , k "<Page_Up>"    __               __               __               __
+  , k "<Page_Down>"  __               __               __               __
+
+  , k "<Up>"         __               __               __               __
+  , k "<Down>"       __               __               __               __
+  , k "<Left>"       __               __               __               __
+  , k "<Right>"      __               __               __               __
   ]
   where
     __               = return ()
