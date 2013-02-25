@@ -1,7 +1,8 @@
 
 import Data.Char                         (toUpper)
+import Data.Function                     (on)
 import qualified Data.Map as M           (Map,fromList,lookup)
-import Data.Monoid                       (All)
+import Data.Monoid                       (All,mconcat)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
 import XMonad                            -- many
@@ -38,6 +39,7 @@ import qualified XMonad.StackSet as W    -- many
 import XMonad.Util.Cursor                (setDefaultCursor)
 import XMonad.Util.EZConfig              (mkKeymap)
 import XMonad.Util.Run                   (spawnPipe)
+import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
 
 home :: String
 home = "/home/local/.xmonad/"
@@ -342,6 +344,7 @@ myLogHook c u d = logHook c
         , ppSep      = " "
         , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
         , ppWsSep    = " "
+        , ppSort     = mkWsSort cmp
         , ppCurrent  = xmobarColor "black"  "yellow" . map toUpper . wrap " " " " . shortcut
         , ppHidden   = xmobarColor "white"  "" . shortcut
         , ppHiddenNoWindows =
@@ -353,6 +356,13 @@ myLogHook c u d = logHook c
            shortcut x = case (M.lookup x labels) of
                Just i  -> i ++ "-" ++ x
                Nothing -> x
+           cmp = do wsIndex <- getWsIndex
+                    return $ mconcat [foo `on` wsIndex, compare]
+                  where
+                      foo (Just a) (Just b) = compare a b
+                      foo Nothing (Just _)  = GT
+                      foo (Just _) Nothing  = LT
+                      foo Nothing Nothing   = EQ
 
 myTopBar :: String
 myTopBar    = "/usr/bin/xmobar " ++ home ++ "xmobar-top"
