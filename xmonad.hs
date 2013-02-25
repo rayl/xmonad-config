@@ -8,7 +8,7 @@ import XMonad                            -- many
 import XMonad.Actions.CycleWS            (toggleWS, toggleOrView,moveTo,
                                           WSType(HiddenWS),Direction1D(..),
                                           shiftToNext, shiftToPrev)
-import XMonad.Actions.DynamicWorkspaces  (addWorkspacePrompt,
+import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,
                                           removeEmptyWorkspaceAfterExcept,
                                           renameWorkspace)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
@@ -232,7 +232,7 @@ keyboardMap conf = concat
     toPrevWorkspace  = shiftToPrev
     lastWorkspace    = toggleWS
     dashWorkspace    = toggleOrView "dash"
-    newWorkspace     = addWorkspacePrompt defaultXPConfig
+    newWorkspace     = selectWorkspace defaultXPConfig
     killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces $ moveTo Next HiddenWS
     nameWorkspace    = renameWorkspace defaultXPConfig
     refresh'         = refresh
