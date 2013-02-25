@@ -5,7 +5,8 @@ import Data.Monoid                       (All)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
 import XMonad                            -- many
-import XMonad.Actions.CycleWS            (nextWS, prevWS, toggleWS, toggleOrView,
+import XMonad.Actions.CycleWS            (toggleWS, toggleOrView,moveTo,
+                                          WSType(HiddenWS),Direction1D(..),
                                           shiftToNext, shiftToPrev)
 import XMonad.Actions.DynamicWorkspaces  (addWorkspacePrompt,
                                           removeEmptyWorkspaceAfterExcept,
@@ -159,8 +160,8 @@ mouseMap conf = concat
   ] 
   where
     __               = \_ -> return ()
-    nextWorkspace    = \_ -> nextWS
-    prevWorkspace    = \_ -> prevWS
+    nextWorkspace    = \_ -> moveTo Next HiddenWS
+    prevWorkspace    = \_ -> moveTo Prev HiddenWS
     focusDown        = \_ -> windows W.focusDown
     focusUp          = \_ -> windows W.focusUp
     shiftMaster      = \w -> focus w >> windows W.shiftMaster
@@ -225,14 +226,14 @@ keyboardMap conf = concat
     restartXmonad    = restart "xmonad" True
     resetXmonad      = restart "xmonad" False
     quitXmonad       = io $ exitWith ExitSuccess
-    nextWorkspace    = nextWS
-    prevWorkspace    = prevWS
+    nextWorkspace    = moveTo Next HiddenWS
+    prevWorkspace    = moveTo Prev HiddenWS
     toNextWorkspace  = shiftToNext
     toPrevWorkspace  = shiftToPrev
     lastWorkspace    = toggleWS
     dashWorkspace    = toggleOrView "dash"
     newWorkspace     = addWorkspacePrompt defaultXPConfig
-    killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces nextWS
+    killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces $ moveTo Next HiddenWS
     nameWorkspace    = renameWorkspace defaultXPConfig
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
