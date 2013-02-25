@@ -345,7 +345,8 @@ myLogHook c u d = logHook c
         , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
         , ppWsSep    = " "
         , ppSort     = mkWsSort cmp
-        , ppCurrent  = xmobarColor "black"  "yellow" . map toUpper . wrap " " " " . shortcut
+        , ppCurrent  = xmobarColor "black"  "yellow" . wrap " " " " . shortcut
+        , ppVisible  = xmobarColor "green"   "" . shortcut
         , ppHidden   = xmobarColor "white"  "" . shortcut
         , ppHiddenNoWindows =
                        xmobarColor "#444"   "black" . shortcut
