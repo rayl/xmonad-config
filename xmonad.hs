@@ -188,9 +188,9 @@ keyboardMap conf = concat
   , k "<Backspace>"  __               __               __               __
 
   , k "q"            restartXmonad    resetXmonad      __              quitXmonad
-  , k "w"            __               __               __               __
-  , k "e"            __               __               __               __
-  , k "r"            __               __               __               __
+--, k "w"            __               __               __               __
+--, k "e"            __               __               __               __
+--, k "r"            __               __               __               __
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
   , k "u"            prevWorkspace    toPrevWorkspace  __               __
@@ -275,7 +275,7 @@ keyboardMap conf = concat
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
    [(mod ++ key, windows $ cmd tag)
-       | (tag, key) <- zip myWorkspaces $ map show [1..]
+       | (tag, key) <- zip myWorkspaces $ map show $ [1..9] ++ [0]
        , (cmd, mod) <- [(W.greedyView,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
 
 screenMap :: XConfig l -> [(String, X ())]
