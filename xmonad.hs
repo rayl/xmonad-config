@@ -43,8 +43,6 @@ import XMonad.Util.EZConfig              (mkKeymap)
 import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
 
-home :: String
-home = "/home/local/.xmonad/"
 
 myTerminal :: String
 myTerminal = "urxvt"
