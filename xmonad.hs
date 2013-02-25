@@ -396,14 +396,23 @@ focusedTitleOnScreen n = do
     return (\_ -> n)
 
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
-myLogHook c u0 d0 u1 d1 = 
+myLogHook c u0 d0 u1 d1 = do
+    g0 <- focusedTitleOnScreen 0
+    g1 <- focusedTitleOnScreen 1
     id $ logHook c
 
          -- top status bar
          <+> dynamicLogWithPP defaultPP
-             { ppOutput   = \s -> hPutStrLn u0 s >> hPutStrLn u1 s
+             { ppOutput   = hPutStrLn u0
              , ppOrder    = \(ws:l:t:_) -> [t]
-             , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  "
+             , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g0
+             }
+
+         -- top status bar
+         <+> dynamicLogWithPP defaultPP
+             { ppOutput   = hPutStrLn u1
+             , ppOrder    = \(ws:l:t:_) -> [t]
+             , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g1
              }
 
          -- bottom status bar
