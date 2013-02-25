@@ -190,7 +190,7 @@ keyboardMap conf = concat
   -- see workspaceMap for number keys
   , k "-"            __               __               __               __
   , k "="            __               __               __               __
-  , k "<Backspace>"  __               __               __               __
+  , k "<Backspace>"  closeWindow      __               __               __
 
   , k "<Tab>"        __               __               __               __
   , k "q"            restartXmonad    resetXmonad      __              quitXmonad
@@ -218,7 +218,7 @@ keyboardMap conf = concat
   , k "'"            __               __               __               __
   , k "<Return>"     swapMaster       shiftMaster      __               __
 
-  , k "z"            fullscreen       closeWindow      __               __
+  , k "z"            fullscreen       __               __               __
   , k "x"            toggleStruts     fetchMouse       __               __
   , k "c"            newWorkspace     killWorkspace    nameWorkspace    __
   , k "v"            __               __               __               __
