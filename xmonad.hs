@@ -394,43 +394,45 @@ focusedTitleOnScreen n = do
                (\s -> fmap show $ getName $ W.focus s)
                t
     return (\_ -> n)
+
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
-myLogHook c u0 d0 u1 d1 = logHook c
+myLogHook c u0 d0 u1 d1 = 
+    id $ logHook c
 
-    -- top status bar
-    <+> dynamicLogWithPP defaultPP
-        { ppOutput   = \s -> hPutStrLn u0 s >> hPutStrLn u1 s
-        , ppOrder    = \(ws:l:t:_) -> [t]
-        , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  "
-        }
+         -- top status bar
+         <+> dynamicLogWithPP defaultPP
+             { ppOutput   = \s -> hPutStrLn u0 s >> hPutStrLn u1 s
+             , ppOrder    = \(ws:l:t:_) -> [t]
+             , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  "
+             }
 
-    -- bottom status bar
-    <+> dynamicLogWithPP defaultPP
-        { ppOutput   = \s -> hPutStrLn d0 s >> hPutStrLn d1 s
-        , ppOrder    = \(ws:l:t:_) -> [l,ws]
-        , ppSep      = " "
-        , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
-        , ppWsSep    = " "
-        , ppSort     = mkWsSort cmp
-        , ppCurrent  = xmobarColor "black"  "yellow" . wrap " " " " . shortcut
-        , ppVisible  = xmobarColor "green"   "" . shortcut
-        , ppHidden   = xmobarColor "white"  "" . shortcut
-        , ppHiddenNoWindows =
-                       xmobarColor "#444"   "black" . shortcut
-        , ppUrgent   = xmobarColor "black"  "red" . wrap " " " " . shortcut
-        }
-        where
-           labels = M.fromList $ zip myWorkspaces (map show [1..])
-           shortcut x = case (M.lookup x labels) of
-               Just i  -> i ++ "-" ++ x
-               Nothing -> x
-           cmp = do wsIndex <- getWsIndex
-                    return $ mconcat [foo `on` wsIndex, compare]
-                  where
-                      foo (Just a) (Just b) = compare a b
-                      foo Nothing (Just _)  = GT
-                      foo (Just _) Nothing  = LT
-                      foo Nothing Nothing   = EQ
+         -- bottom status bar
+         <+> dynamicLogWithPP defaultPP
+             { ppOutput   = \s -> hPutStrLn d0 s >> hPutStrLn d1 s
+             , ppOrder    = \(ws:l:t:_) -> [l,ws]
+             , ppSep      = " "
+             , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
+             , ppWsSep    = " "
+             , ppSort     = mkWsSort cmp
+             , ppCurrent  = xmobarColor "black"  "yellow" . wrap " " " " . shortcut
+             , ppVisible  = xmobarColor "green"   "" . shortcut
+             , ppHidden   = xmobarColor "white"  "" . shortcut
+             , ppHiddenNoWindows =
+                            xmobarColor "#444"   "black" . shortcut
+             , ppUrgent   = xmobarColor "black"  "red" . wrap " " " " . shortcut
+             }
+             where
+                labels = M.fromList $ zip myWorkspaces (map show [1..])
+                shortcut x = case (M.lookup x labels) of
+                    Just i  -> i ++ "-" ++ x
+                    Nothing -> x
+                cmp = do wsIndex <- getWsIndex
+                         return $ mconcat [foo `on` wsIndex, compare]
+                       where
+                           foo (Just a) (Just b) = compare a b
+                           foo Nothing (Just _)  = GT
+                           foo (Just _) Nothing  = LT
+                           foo Nothing Nothing   = EQ
 
 ------------------------------------------------------------------------
 -- STARTUP
