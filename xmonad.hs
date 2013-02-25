@@ -13,6 +13,7 @@ import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,
                                           renameWorkspace)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
 import XMonad.Actions.SwapWorkspaces     (swapWithCurrent)
+import XMonad.Actions.Warp               (warpToWindow)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
 import XMonad.Hooks.DynamicLog           -- many
 import XMonad.Hooks.EwmhDesktops         (ewmh,fullscreenEventHook)
@@ -218,7 +219,7 @@ keyboardMap conf = concat
   , k "<Return>"     swapMaster       shiftMaster      __               __
 
   , k "z"            fullscreen       closeWindow      __               __
-  , k "x"            toggleStruts     __               __               __
+  , k "x"            toggleStruts     fetchMouse       __               __
   , k "c"            newWorkspace     killWorkspace    nameWorkspace    __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
@@ -282,6 +283,7 @@ keyboardMap conf = concat
     openDmenu        = spawn "dmenu_run"
     searchPrompt     = promptSearch defaultXPConfig google
     searchSelection  = selectSearch google
+    fetchMouse       = warpToWindow 0.5 0.5
 
     k key m ms mc msc =
         [ bind "M-"      key m
