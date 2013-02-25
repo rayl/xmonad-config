@@ -34,7 +34,8 @@ import XMonad.Layout.PerWorkspace        (onWorkspace)
 import XMonad.Layout.Reflect             (reflectHoriz)
 import XMonad.Layout.Renamed             (renamed,Rename(Replace,CutWordsLeft))
 import XMonad.Layout.ResizableTile       (ResizableTall(..))
-import XMonad.Prompt                     (defaultXPConfig)
+import XMonad.Prompt                     (defaultXPConfig,autoComplete)
+import XMonad.Prompt.Workspace           (workspacePrompt)
 import qualified XMonad.StackSet as W    -- many
 import XMonad.Util.Cursor                (setDefaultCursor)
 import XMonad.Util.EZConfig              (mkKeymap)
@@ -222,8 +223,8 @@ keyboardMap conf = concat
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
 
-  , k "z"            fullscreen       fetchMouse       __               __
-  , k "x"            toggleStruts     __               __               __
+  , k "z"            pickWorkspace    fullscreen       __               __
+  , k "x"            fetchMouse       toggleStruts     __               __
   , k "c"            newWorkspace     nameWorkspace    __               __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
@@ -260,6 +261,11 @@ keyboardMap conf = concat
     toNextWorkspace  = shiftTo Next HiddenWS
     toPrevWorkspace  = shiftTo Prev HiddenWS
     lastWorkspace    = toggleWS
+    pickWorkspace    = workspacePrompt defaultXPConfig { autoComplete = Just 1 } $ \w ->
+                       do s <- gets windowset
+                          if W.tagMember w s
+                            then windows $ W.greedyView w
+                            else return ()
     newWorkspace     = selectWorkspace defaultXPConfig
     killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces $ moveTo Next HiddenWS
     nameWorkspace    = renameWorkspace defaultXPConfig
