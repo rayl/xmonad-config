@@ -8,7 +8,8 @@ import XMonad                            -- many
 import XMonad.Actions.CycleWS            (nextWS, prevWS, toggleWS, toggleOrView,
                                           shiftToNext, shiftToPrev)
 import XMonad.Actions.DynamicWorkspaces  (addWorkspacePrompt,
-                                          removeEmptyWorkspaceAfterExcept)
+                                          removeEmptyWorkspaceAfterExcept,
+                                          renameWorkspace)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
 import XMonad.Actions.SwapWorkspaces     (swapWithCurrent)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
@@ -202,7 +203,7 @@ keyboardMap conf = concat
 
   , k "z"            fullscreen       closeWindow      __               __
   , k "x"            toggleStruts     __               __               __
-  , k "c"            newWorkspace     killWorkspace    __               __
+  , k "c"            newWorkspace     killWorkspace    nameWorkspace    __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
   , k "n"            refresh'         __               __               __
@@ -225,6 +226,7 @@ keyboardMap conf = concat
     dashWorkspace    = toggleOrView "dash"
     newWorkspace     = addWorkspacePrompt defaultXPConfig
     killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces nextWS
+    nameWorkspace    = renameWorkspace defaultXPConfig
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
