@@ -65,7 +65,8 @@ main = do
         , focusedBorderColor = myFocusedBorderColor
         , modMask            = myModMask
         , keys               = myKeys
-        , logHook            = myLogHook defaultConfig topBar0 bottomBar0 topBar1 bottomBar1
+        , logHook            = myLogHook defaultConfig topBar0 bottomBar0
+                                                       topBar1 bottomBar1
         , startupHook        = myStartupHook
         , mouseBindings      = myMouseBindings
         , manageHook         = myManageHook defaultConfig
@@ -90,7 +91,7 @@ myFocusedBorderColor = "#ff4"
 -- WORKSPACES
 ------------------------------------------------------------------------
 myWorkspaces :: [WorkspaceId]
-myWorkspaces = ["dash","todo","news","book","tune"]
+myWorkspaces = ["dash","todo","news","book","song"]
 
 
 ------------------------------------------------------------------------
@@ -132,7 +133,6 @@ myManageHook c =  myManageHooks
 myManageHooks :: ManageHook
 myManageHooks = composeAll
     [ className =? "Gimp"             --> unfloat
-    , className =? "foo"              --> unfloat
     ]
     where
        unfloat = ask >>= doF . W.sink
@@ -269,12 +269,12 @@ keyboardMap conf = concat
                             then windows $ W.greedyView w
                             else return ()
     newWorkspace     = selectWorkspace defaultXPConfig
-    killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces $ moveTo Next HiddenWS
+    killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces nextWorkspace
     nameWorkspace    = renameWorkspace defaultXPConfig
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
-    fullscreen       = sendMessage $ Toggle ZOOM
+    fullscreen       = sendMessage (Toggle ZOOM)
     toggleStruts     = sendMessage ToggleStruts
     expandMaster     = sendMessage Expand
     shrinkMaster     = sendMessage Shrink
@@ -408,21 +408,21 @@ myLogHook c u0 d0 u1 d1 = do
     g1 <- focusedTitleOnScreen 1
     id $ logHook c
 
-         -- top status bar
+         -- top status bar 0
          <+> dynamicLogWithPP defaultPP
              { ppOutput   = hPutStrLn u0
              , ppOrder    = \(ws:l:t:_) -> [t]
              , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g0
              }
 
-         -- top status bar
+         -- top status bar 1
          <+> dynamicLogWithPP defaultPP
              { ppOutput   = hPutStrLn u1
              , ppOrder    = \(ws:l:t:_) -> [t]
              , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g1
              }
 
-         -- bottom status bar
+         -- bottom status bar 0 and 1
          <+> dynamicLogWithPP defaultPP
              { ppOutput   = \s -> hPutStrLn d0 s >> hPutStrLn d1 s
              , ppOrder    = \(ws:l:t:_) -> [l,ws]
@@ -451,6 +451,7 @@ myLogHook c u0 d0 u1 d1 = do
                         foo Nothing (Just _)  = GT
                         foo (Just _) Nothing  = LT
                         foo Nothing Nothing   = EQ
+
 
 ------------------------------------------------------------------------
 -- STARTUP
