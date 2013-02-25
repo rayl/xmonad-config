@@ -39,6 +39,9 @@ import XMonad.Util.Run                   (spawnPipe)
 home :: String
 home = "/home/local/.xmonad/"
 
+myTerminal :: String
+myTerminal = "urxvt"
+
 main :: IO ()
 main = do
     topBar    <- spawnPipe myTopBar
@@ -47,6 +50,7 @@ main = do
         { borderWidth        = myBorderWidth
         , workspaces         = myWorkspaces
         , layoutHook         = myLayoutHook
+        , terminal           = myTerminal
         , normalBorderColor  = myNormalBorderColor
         , focusedBorderColor = myFocusedBorderColor
         , modMask            = myModMask
