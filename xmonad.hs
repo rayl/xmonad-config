@@ -1,6 +1,7 @@
 
 import Data.Char                         (toUpper)
 import Data.Function                     (on)
+import qualified Data.List as L          (intersperse)
 import qualified Data.Map as M           (Map,fromList,lookup)
 import Data.Monoid                       (All,mconcat)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
@@ -338,14 +339,49 @@ data Pos = T | B deriving (Eq)
 
 spawnBar :: Int -> Pos -> IO Handle
 spawnBar s p = spawnPipe cmd
-      where
-         cfg | p == T = "xmobar-top"
-             | p == B = "xmobar-bottom"
-         cmd = unwords [ "/usr/bin/xmobar"
-                       , "-x"
-                       , show s
-                       , home ++ cfg
-                       ]
+    where cmd = unwords [ "/usr/bin/xmobar"
+                        , "-f -*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
+                        , "-B black"
+                        , "-F grey"
+                        , pos
+                        , "-a '}{'"
+                        , "-s '%'"
+                        , "-t", fmtt template
+                        , "-c", fmtc commands
+                        , "-x" , show s
+                        ]
+                    where fmtt [l,c,r] = wrap "'" "'" $ l ++ "}" ++ c ++ "{" ++ r
+                          fmtc x = wrap "'[ " " ]'" $ unwords $ L.intersperse "," x
+                          pos | p == T = "-o"
+                              | p == B = "-b"
+          template
+            | p == T =
+              [ show s
+              , "%StdinReader%"
+              , "<fc=#ee9a00>%date%</fc>"
+              ]
+            | p == B =
+              [ "%StdinReader%"
+              , ""
+              , "%multicpu% | %memory%%swap%"
+              ]
+
+          commands
+            | p == T =
+              [ "Run StdinReader"
+              , "Run Date \"%a %Y-%m-%d %H:%M:%S\" \"date\" 10"
+              ]
+            | p == B =
+              [ "Run StdinReader"
+              , "Run MultiCpu [ \"-t\", \"CPU: <total>% (<user>%user, <nice>%nice, <system>%sys) [<autototal>]\",\
+                              \ \"-L\", \"3\",\
+                              \ \"-H\", \"50\",\
+                              \ \"--normal\", \"green\",\
+                              \ \"--high\",\"red\"\
+                              \ ] 10"
+              , "Run Memory [\"-t\",\"MEM: <free>M free, <used>M used, \"] 10"
+              , "Run Swap [\"-t\", \"<used>M swap\"] 10"
+              ]
 
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = logHook c
