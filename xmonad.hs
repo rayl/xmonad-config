@@ -388,10 +388,10 @@ focusedTitleOnScreen n = do
     let ss = (W.current ws) : (W.visible ws)
         s  = L.find ((n==) . W.screen) ss
         t  = maybe Nothing
-                   (\s -> W.stack $ W.workspace s)
+                   (W.stack . W.workspace)
                    s
     n <- maybe (return "<empty>")
-               (\s -> fmap show $ getName $ W.focus s)
+               (fmap show . getName . W.focus)
                t
     return (\_ -> n)
 
@@ -431,17 +431,19 @@ myLogHook c u0 d0 u1 d1 = do
              , ppUrgent   = xmobarColor "black"  "red" . wrap " " " " . shortcut
              }
              where
-                labels = M.fromList $ zip myWorkspaces (map show [1..])
                 shortcut x = case (M.lookup x labels) of
-                    Just i  -> i ++ "-" ++ x
-                    Nothing -> x
+                                Just i  -> i ++ "-" ++ x
+                                Nothing -> x
+                    where
+                        labels = M.fromList $ zip myWorkspaces (map show [1..])
+
                 cmp = do wsIndex <- getWsIndex
                          return $ mconcat [foo `on` wsIndex, compare]
-                       where
-                           foo (Just a) (Just b) = compare a b
-                           foo Nothing (Just _)  = GT
-                           foo (Just _) Nothing  = LT
-                           foo Nothing Nothing   = EQ
+                    where
+                        foo (Just a) (Just b) = compare a b
+                        foo Nothing (Just _)  = GT
+                        foo (Just _) Nothing  = LT
+                        foo Nothing Nothing   = EQ
 
 ------------------------------------------------------------------------
 -- STARTUP
