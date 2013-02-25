@@ -50,10 +50,10 @@ myTerminal = "urxvt"
 
 main :: IO ()
 main = do
-    topBar0    <- spawnPipe myTopBar0
-    bottomBar0 <- spawnPipe myBottomBar0
-    topBar1    <- spawnPipe myTopBar1
-    bottomBar1 <- spawnPipe myBottomBar1
+    topBar0    <- spawnBar 0 T
+    bottomBar0 <- spawnBar 0 B
+    topBar1    <- spawnBar 1 T
+    bottomBar1 <- spawnBar 1 B
     xmonad $ ewmh
            $ withUrgencyHook NoUrgencyHook
            $ defaultConfig
@@ -334,6 +334,19 @@ myMouseBindings conf = M.fromList $ concat $ map ($ conf) myMouseMaps
 ------------------------------------------------------------------------
 -- LOGGING
 ------------------------------------------------------------------------
+data Pos = T | B deriving (Eq)
+
+spawnBar :: Int -> Pos -> IO Handle
+spawnBar s p = spawnPipe cmd
+      where
+         cfg | p == T = "xmobar-top"
+             | p == B = "xmobar-bottom"
+         cmd = unwords [ "/usr/bin/xmobar"
+                       , "-x"
+                       , show s
+                       , home ++ cfg
+                       ]
+
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = logHook c
 
@@ -371,13 +384,6 @@ myLogHook c u0 d0 u1 d1 = logHook c
                       foo Nothing (Just _)  = GT
                       foo (Just _) Nothing  = LT
                       foo Nothing Nothing   = EQ
-
-myTopBar0,myBottomBar0,myTopBar1,myBottomBar1 :: String
-myTopBar0    = "/usr/bin/xmobar -x 0 " ++ home ++ "xmobar-top"
-myBottomBar0 = "/usr/bin/xmobar -x 0 " ++ home ++ "xmobar-bottom"
-myTopBar1    = "/usr/bin/xmobar -x 1 " ++ home ++ "xmobar-top"
-myBottomBar1 = "/usr/bin/xmobar -x 1 " ++ home ++ "xmobar-bottom"
-
 
 ------------------------------------------------------------------------
 -- STARTUP
