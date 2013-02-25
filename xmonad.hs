@@ -355,7 +355,7 @@ spawnBar s p = spawnPipe cmd
                               | p == B = "-b"
           template
             | p == T =
-              [ show s
+              [ xmobarColor "black" "lightblue" . wrap " " " " $ (show s)
               , "%StdinReader%"
               , "<fc=#ee9a00>%date%</fc>"
               ]
