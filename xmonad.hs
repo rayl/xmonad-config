@@ -18,6 +18,7 @@ import XMonad.Hooks.EwmhDesktops         (ewmh,fullscreenEventHook)
 import XMonad.Hooks.ManageDocks          (manageDocks,docksEventHook,
                                           avoidStruts,ToggleStruts(..))
 import XMonad.Hooks.SetWMName            (setWMName)
+import XMonad.Hooks.UrgencyHook          (withUrgencyHook, NoUrgencyHook(..))
 import XMonad.Layout.IM                  (withIM,Property(Role))
 import XMonad.Layout.MouseResizableTile  (mouseResizableTile, draggerType,
                                           DraggerType(BordersDragger),
@@ -46,7 +47,9 @@ main :: IO ()
 main = do
     topBar    <- spawnPipe myTopBar
     bottomBar <- spawnPipe myBottomBar
-    xmonad $ ewmh $ defaultConfig
+    xmonad $ ewmh
+           $ withUrgencyHook NoUrgencyHook
+           $ defaultConfig
         { borderWidth        = myBorderWidth
         , workspaces         = myWorkspaces
         , layoutHook         = myLayoutHook
@@ -310,7 +313,7 @@ myLogHook c u d = logHook c
         , ppHidden   = xmobarColor "white"  "" . shortcut
         , ppHiddenNoWindows =
                        xmobarColor "#444"   "black" . shortcut
-        , ppUrgent   = xmobarColor "red"    "yellow"
+        , ppUrgent   = xmobarColor "black"  "red" . wrap " " " " . shortcut
         }
         where
            labels = M.fromList $ zip myWorkspaces (map show [1..])
