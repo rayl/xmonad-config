@@ -1,7 +1,7 @@
 
 import Data.Char                         (toUpper)
 import Data.Function                     (on)
-import qualified Data.List as L          (intersperse)
+import qualified Data.List as L          (intersperse,find)
 import qualified Data.Map as M           (Map,fromList,lookup)
 import Data.Monoid                       (All,mconcat)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
@@ -40,6 +40,7 @@ import XMonad.Prompt.Workspace           (workspacePrompt)
 import qualified XMonad.StackSet as W    -- many
 import XMonad.Util.Cursor                (setDefaultCursor)
 import XMonad.Util.EZConfig              (mkKeymap)
+import XMonad.Util.NamedWindows          (getName)
 import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
 
@@ -381,6 +382,18 @@ spawnBar s p = spawnPipe cmd
               , "Run Swap [\"-t\", \"<used>M swap\"] 10"
               ]
 
+focusedTitleOnScreen :: ScreenId -> X (String -> String)
+focusedTitleOnScreen n = do
+    ws <- gets windowset
+    let ss = (W.current ws) : (W.visible ws)
+        s  = L.find ((n==) . W.screen) ss
+        t  = maybe Nothing
+                   (\s -> W.stack $ W.workspace s)
+                   s
+    n <- maybe (return "<empty>")
+               (\s -> fmap show $ getName $ W.focus s)
+               t
+    return (\_ -> n)
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = logHook c
 
