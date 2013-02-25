@@ -197,7 +197,7 @@ keyboardMap conf = concat
   , k "o"            nextWorkspace    toNextWorkspace  __               __
   , k "p"            __               __               __               __
 
-  , k "a"            openTerminal     openDmenu        __               __
+  , k "a"            openTerminal     openChrome       openDmenu        __
   , k "s"            searchPrompt     searchSelection  __               __
   , k "d"            gotoMenu'        bringMenu'       __               __
   , k "f"            __               __               __               __
@@ -257,6 +257,7 @@ keyboardMap conf = concat
     shiftMaster      = windows W.shiftMaster
     focusMaster      = windows W.focusMaster
     openTerminal     = spawn $ terminal conf
+    openChrome       = spawn "google-chrome"
     openDmenu        = spawn "dmenu_run"
     searchPrompt     = promptSearch defaultXPConfig google
     searchSelection  = selectSearch google
