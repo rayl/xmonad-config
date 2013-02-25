@@ -306,10 +306,9 @@ keyboardMap conf = concat
       where
         bind mod key cmd = (mod ++ key, cmd)
 
-    onScr n f =
-      screenBy n >>=
-      screenWorkspace >>=
-      flip whenJust (windows . f)
+    onScr n f = screenBy n
+            >>= screenWorkspace
+            >>= flip whenJust (windows . f)
 
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
