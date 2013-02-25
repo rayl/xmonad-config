@@ -50,8 +50,10 @@ myTerminal = "urxvt"
 
 main :: IO ()
 main = do
-    topBar    <- spawnPipe myTopBar
-    bottomBar <- spawnPipe myBottomBar
+    topBar0    <- spawnPipe myTopBar0
+    bottomBar0 <- spawnPipe myBottomBar0
+    topBar1    <- spawnPipe myTopBar1
+    bottomBar1 <- spawnPipe myBottomBar1
     xmonad $ ewmh
            $ withUrgencyHook NoUrgencyHook
            $ defaultConfig
@@ -63,7 +65,7 @@ main = do
         , focusedBorderColor = myFocusedBorderColor
         , modMask            = myModMask
         , keys               = myKeys
-        , logHook            = myLogHook defaultConfig topBar bottomBar
+        , logHook            = myLogHook defaultConfig topBar0 bottomBar0 topBar1 bottomBar1
         , startupHook        = myStartupHook
         , mouseBindings      = myMouseBindings
         , manageHook         = myManageHook defaultConfig
@@ -332,19 +334,19 @@ myMouseBindings conf = M.fromList $ concat $ map ($ conf) myMouseMaps
 ------------------------------------------------------------------------
 -- LOGGING
 ------------------------------------------------------------------------
-myLogHook :: XConfig l -> Handle -> Handle -> X ()
-myLogHook c u d = logHook c
+myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
+myLogHook c u0 d0 u1 d1 = logHook c
 
     -- top status bar
     <+> dynamicLogWithPP defaultPP
-        { ppOutput   = hPutStrLn u
+        { ppOutput   = \s -> hPutStrLn u0 s >> hPutStrLn u1 s
         , ppOrder    = \(ws:l:t:_) -> [t]
         , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  "
         }
 
     -- bottom status bar
     <+> dynamicLogWithPP defaultPP
-        { ppOutput   = hPutStrLn d
+        { ppOutput   = \s -> hPutStrLn d0 s >> hPutStrLn d1 s
         , ppOrder    = \(ws:l:t:_) -> [l,ws]
         , ppSep      = " "
         , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
@@ -370,11 +372,11 @@ myLogHook c u d = logHook c
                       foo (Just _) Nothing  = LT
                       foo Nothing Nothing   = EQ
 
-myTopBar :: String
-myTopBar    = "/usr/bin/xmobar " ++ home ++ "xmobar-top"
-
-myBottomBar :: String
-myBottomBar = "/usr/bin/xmobar " ++ home ++ "xmobar-bottom"
+myTopBar0,myBottomBar0,myTopBar1,myBottomBar1 :: String
+myTopBar0    = "/usr/bin/xmobar -x 0 " ++ home ++ "xmobar-top"
+myBottomBar0 = "/usr/bin/xmobar -x 0 " ++ home ++ "xmobar-bottom"
+myTopBar1    = "/usr/bin/xmobar -x 1 " ++ home ++ "xmobar-top"
+myBottomBar1 = "/usr/bin/xmobar -x 1 " ++ home ++ "xmobar-bottom"
 
 
 ------------------------------------------------------------------------
