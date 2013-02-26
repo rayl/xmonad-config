@@ -190,7 +190,7 @@ mouseMap conf = concat
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "<Esc>"        refresh'         __               __               __
+  [ k "<Esc>"        __               __               __               __
 
   , k "`"            lastWorkspace    __               __               __
   -- see workspaceMap for number keys
@@ -237,7 +237,7 @@ keyboardMap conf = concat
   , k "."            decMaster        __               __               __
   , k "/"            __               __               __               __
 
-  , k "<Space>"      nextLayout       firstLayout      __               __
+  , k "<Space>"      nextLayout       firstLayout      __               refresh'
 
   , k "<Home>"       __               __               __               __
   , k "<End>"        __               __               __               __
