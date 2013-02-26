@@ -411,14 +411,22 @@ myLogHook c u0 d0 u1 d1 = do
          -- top status bar 0
          <+> dynamicLogWithPP defaultPP
              { ppOutput   = hPutStrLn u0
-             , ppOrder    = \(ws:l:t:_) -> [t]
+             , ppOrder    = \(ws:l:t:_) -> [ws,t]
+             , ppCurrent  = xmobarColor "white"  "blue" . wrap " " " "
+             , ppVisible  = const ""
+             , ppHidden   = const ""
+             , ppHiddenNoWindows = const ""
              , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g0
              }
 
          -- top status bar 1
          <+> dynamicLogWithPP defaultPP
              { ppOutput   = hPutStrLn u1
-             , ppOrder    = \(ws:l:t:_) -> [t]
+             , ppOrder    = \(ws:l:t:_) -> [ws,t]
+             , ppCurrent  = xmobarColor "white"  "blue" . wrap " " " "
+             , ppVisible  = const ""
+             , ppHidden   = const ""
+             , ppHiddenNoWindows = const ""
              , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g1
              }
 
