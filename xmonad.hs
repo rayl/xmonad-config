@@ -184,7 +184,7 @@ keyboardMap conf = concat
   [ k "<Esc>"        viewUrgnWSpace   __               __               __
 
   , k "`"            viewLastWSpace   takeLastWSpace   sendLastWSpace   __
-  -- see workspaceMap for number keys
+  --                 see workspaceMap for number keys
   , k "-"            __               __               __               __
   , k "="            __               __               __               __
   , k "<Backspace>"  killWindow       __               __               __
