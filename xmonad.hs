@@ -291,8 +291,8 @@ keyboardMap conf = concat
 
     view             = windows . W.view
     send             = windows . W.shift
-    sink             = windows . W.sink
     take             = \w -> send w >> view w
+    sink             = windows . W.sink
 
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
@@ -324,8 +324,8 @@ keyboardMap conf = concat
 functionMap :: XConfig l -> [((KeyMask, KeySym), X ())]
 functionMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k xK_F1          (viewScreen 0)   (toScreen 0)     __               __
-  , k xK_F2          (viewScreen 1)   (toScreen 1)     __               __
+  [ k xK_F1          (viewScreen 0)   (takeScreen 0)   (sendScreen 0)   __
+  , k xK_F2          (viewScreen 1)   (takeScreen 1)   (sendScreen 1)   __
   , k xK_F3          __               __               __               __
   , k xK_F4          __               __               __               __
   , k xK_F5          __               __               __               __
@@ -340,12 +340,17 @@ functionMap conf = concat
   where
     k = bindKeySym
     __               = return ()
-    viewScreen s     = absScreen s W.view
-    toScreen s       = absScreen s W.shift
+    viewScreen s     = absScreen s view
+    sendScreen s     = absScreen s send
+    takeScreen s     = absScreen s take
+
+    view             = windows . W.view
+    send             = windows . W.shift
+    take             = \w -> send w >> view w
 
     absScreen n f = return n
                 >>= screenWorkspace
-                >>= flip whenJust (windows . f)
+                >>= flip whenJust f
 
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
