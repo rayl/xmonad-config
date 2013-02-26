@@ -153,6 +153,7 @@ myHandleEventHook c =  handleEventHook c
 myModMask   =   mod4Mask
 myKeyMaps   = [ keyboardMap, workspaceMap ]
 myMouseMaps = [ mouseMap ] 
+myWsShortcuts = map show $ [1..9] ++ [0]
 
 
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
@@ -315,7 +316,7 @@ keyboardMap conf = concat
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
    [(mod ++ key, windows $ cmd tag)
-       | (tag, key) <- zip myWorkspaces $ map show $ [1..9] ++ [0]
+       | (tag, key) <- zip myWorkspaces myWsShortcuts
        , (cmd, mod) <- [(W.greedyView,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
 
 screenMap :: XConfig l -> [(String, X ())]
@@ -463,7 +464,7 @@ myLogHook c u0 d0 u1 d1 = do
                                 Just i  -> i ++ "-" ++ x
                                 Nothing -> x
                     where
-                        labels = M.fromList $ zip myWorkspaces (map show [1..])
+                        labels = M.fromList $ zip myWorkspaces myWsShortcuts
 
                 cmp = do wsIndex <- getWsIndex
                          return $ mconcat [foo `on` wsIndex, compare]
