@@ -166,6 +166,7 @@ mouseMap conf = concat
   , k button5        focusDown        nextWorkspace    __               __
   ] 
   where
+    k = bindButton
     __               = \_ -> return ()
     nextWorkspace    = \_ -> moveTo Next HiddenWS
     prevWorkspace    = \_ -> moveTo Prev HiddenWS
@@ -174,18 +175,6 @@ mouseMap conf = concat
     shiftMaster      = \w -> focus w >> windows W.shiftMaster
     focusWindow      = \w -> focus w
 
-    k key m ms mc msc =
-        [ bind m'    key m
-        , bind ms'   key ms
-        , bind mc'   key mc
-        , bind msc'  key msc
-        ]
-      where
-        bind mod key cmd = ((mod,key), cmd)
-        m'   = myModMask
-        ms'  = myModMask .|. shiftMask
-        mc'  = myModMask .|.               controlMask
-        msc' = myModMask .|. shiftMask .|. controlMask
 
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
@@ -251,6 +240,7 @@ keyboardMap conf = concat
   , k "<Right>"      expandMaster     __               __               __
   ]
   where
+    k = bindString
     __               = return ()
     restartXmonad    = restart "xmonad" True
     resetXmonad      = restart "xmonad" False
@@ -300,15 +290,6 @@ keyboardMap conf = concat
     searchSelection  = selectSearch google
     fetchMouse       = warpToWindow 0.5 0.5
 
-    k key m ms mc msc =
-        [ bind "M-"      key m
-        , bind "M-S-"    key ms
-        , bind "M-C-"    key mc
-        , bind "M-S-C-"  key msc
-        ]
-      where
-        bind mod key cmd = (mod ++ key, cmd)
-
     onScr n f = screenBy n
             >>= screenWorkspace
             >>= flip whenJust (windows . f)
@@ -319,11 +300,36 @@ workspaceMap conf =
        | (tag, key) <- zip myWorkspaces myWsShortcuts
        , (cmd, mod) <- [(W.view,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
 
+bindString :: String -> X () -> X () -> X () -> X () -> [(String, X ())]
+bindString key m ms mc msc =
+        [ bind "M-"      key m
+        , bind "M-S-"    key ms
+        , bind "M-C-"    key mc
+        , bind "M-S-C-"  key msc
+        ]
+           where
+              bind mod key cmd = (mod ++ key, cmd)
+
 screenMap :: XConfig l -> [(String, X ())]
 screenMap conf =
    [(mod ++ key, screenWorkspace scr >>= flip whenJust (windows . cmd))
        | (key, scr) <- zip ["w", "e", "r"] [0..]
        , (cmd, mod) <- [(W.view, "M-"), (W.shift, "M-S-")]]
+
+bindButton :: Button -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
+           -> [((KeyMask,Button), (Window -> X ()))]
+bindButton but m ms mc msc =
+        [ bind m'    but m
+        , bind ms'   but ms
+        , bind mc'   but mc
+        , bind msc'  but msc
+        ]
+           where
+               bind mod but cmd = ((mod,but), cmd)
+               m'   = myModMask
+               ms'  = myModMask .|. shiftMask
+               mc'  = myModMask .|.               controlMask
+               msc' = myModMask .|. shiftMask .|. controlMask
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf = mkKeymap conf $ concat $ map ($ conf) myKeyMaps
