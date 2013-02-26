@@ -199,7 +199,7 @@ keyboardMap conf = concat
   , k "y"            __               __               __               __
   , k "u"            prevWorkspace    atPrevWorkspace  toPrevWorkspace  __
   , k "i"            nextWorkspace    atNextWorkspace  toNextWorkspace  __
-  , k "o"            __               __               __               __
+  , k "o"            someWorkspace    atSomeWorkspace  toSomeWorkspace  __
   , k "p"            __               __               __               __
   , k "["            __               __               __               __
   , k "]"            __               __               __               __
@@ -218,8 +218,8 @@ keyboardMap conf = concat
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
 
-  , k "z"            pickWorkspace    fullscreen       __               __
-  , k "x"            fetchMouse       toggleStruts     __               __
+  , k "z"            fullscreen       toggleStruts     __               __
+  , k "x"            fetchMouse       __               __               __
   , k "c"            newWorkspace     nameWorkspace    __               __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
@@ -245,30 +245,35 @@ keyboardMap conf = concat
   where
     k = bindString
     __               = return ()
+
     restartXmonad    = restart "xmonad" True
     resetXmonad      = restart "xmonad" False
     quitXmonad       = io $ exitWith ExitSuccess
-    nextScreen       = onScr 1 W.view
-    prevScreen       = onScr (-1) W.view
-    toNextScreen     = onScr 1 W.shift
-    toPrevScreen     = onScr (-1) W.shift
+
+    nextScreen       = relScreen   1  W.view
+    prevScreen       = relScreen (-1) W.view
+    toNextScreen     = relScreen   1  W.shift
+    toPrevScreen     = relScreen (-1) W.shift
     atNextScreen     = toNextScreen >> nextScreen
     atPrevScreen     = toPrevScreen >> prevScreen
-    nextWorkspace    = moveTo Next HiddenWS
-    prevWorkspace    = moveTo Prev HiddenWS
+
+    nextWorkspace    = moveTo  Next HiddenWS
+    prevWorkspace    = moveTo  Prev HiddenWS
     toNextWorkspace  = shiftTo Next HiddenWS
     toPrevWorkspace  = shiftTo Prev HiddenWS
     atNextWorkspace  = toNextWorkspace >> nextWorkspace
     atPrevWorkspace  = toPrevWorkspace >> prevWorkspace
+
+    pickWorkspace    = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
+    someWorkspace    = pickWorkspace (windows . W.view)
+    toSomeWorkspace  = pickWorkspace (windows . W.shift)
+    atSomeWorkspace  = pickWorkspace (\w -> (windows . W.shift) w >> (windows . W.view) w)
+
     lastWorkspace    = toggleWS
-    pickWorkspace    = workspacePrompt defaultXPConfig { autoComplete = Just 1 } $ \w ->
-                       do s <- gets windowset
-                          if W.tagMember w s
-                            then windows $ W.view w
-                            else return ()
     newWorkspace     = selectWorkspace defaultXPConfig
     killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces nextWorkspace
     nameWorkspace    = renameWorkspace defaultXPConfig
+
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
@@ -297,9 +302,10 @@ keyboardMap conf = concat
     searchSelection  = selectSearch google
     fetchMouse       = warpToWindow 0.5 0.5
 
-    onScr n f = screenBy n
-            >>= screenWorkspace
-            >>= flip whenJust (windows . f)
+    relScreen n f = return n
+                >>= screenBy
+                >>= screenWorkspace
+                >>= flip whenJust (windows . f)
 
 functionMap :: XConfig l -> [((KeyMask, KeySym), X ())]
 functionMap conf = concat
@@ -320,12 +326,12 @@ functionMap conf = concat
   where
     k = bindKeySym
     __               = return ()
-    viewScreen s     = onScr s W.view
-    toScreen s       = onScr s W.shift
+    viewScreen s     = absScreen s W.view
+    toScreen s       = absScreen s W.shift
 
-    onScr n f = return n
-            >>= screenWorkspace
-            >>= flip whenJust (windows . f)
+    absScreen n f = return n
+                >>= screenWorkspace
+                >>= flip whenJust (windows . f)
 
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
