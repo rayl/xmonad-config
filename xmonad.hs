@@ -14,7 +14,6 @@ import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,
                                           removeEmptyWorkspaceAfterExcept,
                                           renameWorkspace)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
-import XMonad.Actions.SwapWorkspaces     (swapWithCurrent)
 import XMonad.Actions.Warp               (warpToWindow)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
 import XMonad.Hooks.DynamicLog           -- many
@@ -354,9 +353,13 @@ functionMap conf = concat
 
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
-   [(mod ++ key, windows $ cmd tag)
+   [(mod ++ key, cmd $ tag)
        | (tag, key) <- zip myWorkspaces myWsShortcuts
-       , (cmd, mod) <- [(W.view,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
+       , (mod, cmd) <- [("M-",view), ("M-S-",take), ("M-C-",send) ]]
+       where
+           view = windows . W.view
+           send = windows . W.shift
+           take = \w -> send w >> view w
 
 bindString :: String -> X () -> X () -> X () -> X () -> [(String, X ())]
 bindString key m ms mc msc =
