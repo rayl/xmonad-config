@@ -197,8 +197,8 @@ keyboardMap conf = concat
   , k "r"            __               __               __               __
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
-  , k "u"            prevWorkspace    toPrevWorkspace  __               __
-  , k "i"            nextWorkspace    toNextWorkspace  __               __
+  , k "u"            prevWorkspace    atPrevWorkspace  toPrevWorkspace  __
+  , k "i"            nextWorkspace    atNextWorkspace  toNextWorkspace  __
   , k "o"            __               __               __               __
   , k "p"            __               __               __               __
   , k "["            __               __               __               __
@@ -210,10 +210,10 @@ keyboardMap conf = concat
   , k "d"            __               __               __               __
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
-  , k "h"            prevScreen       toPrevScreen     __               __
+  , k "h"            prevScreen       atPrevScreen     toPrevScreen     __
   , k "j"            focusDown        swapDown         __               __
   , k "k"            focusUp          swapUp           __               __
-  , k "l"            nextScreen       toNextScreen     __               __
+  , k "l"            nextScreen       atNextScreen     toNextScreen     __
   , k ";"            __               __               __               __
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
@@ -252,10 +252,14 @@ keyboardMap conf = concat
     prevScreen       = onScr (-1) W.view
     toNextScreen     = onScr 1 W.shift
     toPrevScreen     = onScr (-1) W.shift
+    atNextScreen     = toNextScreen >> nextScreen
+    atPrevScreen     = toPrevScreen >> prevScreen
     nextWorkspace    = moveTo Next HiddenWS
     prevWorkspace    = moveTo Prev HiddenWS
     toNextWorkspace  = shiftTo Next HiddenWS
     toPrevWorkspace  = shiftTo Prev HiddenWS
+    atNextWorkspace  = toNextWorkspace >> nextWorkspace
+    atPrevWorkspace  = toPrevWorkspace >> prevWorkspace
     lastWorkspace    = toggleWS
     pickWorkspace    = workspacePrompt defaultXPConfig { autoComplete = Just 1 } $ \w ->
                        do s <- gets windowset
