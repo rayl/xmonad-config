@@ -310,11 +310,6 @@ bindString key m ms mc msc =
            where
               bind mod key cmd = (mod ++ key, cmd)
 
-screenMap :: XConfig l -> [(String, X ())]
-screenMap conf =
-   [(mod ++ key, screenWorkspace scr >>= flip whenJust (windows . cmd))
-       | (key, scr) <- zip ["w", "e", "r"] [0..]
-       , (cmd, mod) <- [(W.view, "M-"), (W.shift, "M-S-")]]
 
 bindButton :: Button -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
            -> [((KeyMask,Button), (Window -> X ()))]
