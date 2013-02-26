@@ -316,12 +316,12 @@ functionMap conf = concat
   where
     k = bindKeySym
     __               = return ()
-    viewScreen s     = withWindowSet $ \ws ->
-                         whenJust (W.lookupWorkspace s ws)
-                                  (windows . W.view)
-    toScreen s       = withWindowSet $ \ws ->
-                         whenJust (W.lookupWorkspace s ws)
-                                  (windows . W.shift)
+    viewScreen s     = onScr s W.view
+    toScreen s       = onScr s W.shift
+
+    onScr n f = return n
+            >>= screenWorkspace
+            >>= flip whenJust (windows . f)
 
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
