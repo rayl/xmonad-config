@@ -342,7 +342,6 @@ functionMap conf = concat
     viewScreen s     = absScreen s view
     sendScreen s     = absScreen s send
     takeScreen s     = absScreen s take
-
     view             = windows . W.view
     send             = windows . W.shift
     take             = \w -> send w >> view w
@@ -353,13 +352,14 @@ functionMap conf = concat
 
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
-   [(mod ++ key, cmd $ tag)
-       | (tag, key) <- zip myWorkspaces myWsShortcuts
-       , (mod, cmd) <- [("M-",view), ("M-S-",take), ("M-C-",send) ]]
-       where
-           view = windows . W.view
-           send = windows . W.shift
-           take = \w -> send w >> view w
+        [(mod ++ key, cmd $ tag)
+              | (tag, key) <- zip myWorkspaces myWsShortcuts
+              , (mod, cmd) <- actions]
+           where
+               actions = [("M-",view),("M-S-",take),("M-C-",send)]
+               view    = windows . W.view
+               send    = windows . W.shift
+               take    = \w -> send w >> view w
 
 bindString :: String -> X () -> X () -> X () -> X () -> [(String, X ())]
 bindString key m ms mc msc =
@@ -369,7 +369,7 @@ bindString key m ms mc msc =
         , bind "M-S-C-"  key msc
         ]
            where
-              bind mod key cmd = (mod ++ key, cmd)
+               bind mod key cmd = (mod ++ key, cmd)
 
 bindKeySym :: KeySym -> X () -> X () -> X () -> X () -> [((KeyMask,KeySym), X ())]
 bindKeySym key m ms mc msc =
