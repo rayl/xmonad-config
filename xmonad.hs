@@ -310,6 +310,19 @@ bindString key m ms mc msc =
            where
               bind mod key cmd = (mod ++ key, cmd)
 
+bindKeySym :: KeySym -> X () -> X () -> X () -> X () -> [((KeyMask,KeySym), X ())]
+bindKeySym key m ms mc msc =
+        [ bind m'    key m
+        , bind ms'   key ms
+        , bind mc'   key mc
+        , bind msc'  key msc
+        ]
+           where
+               bind mod key cmd = ((mod,key), cmd)
+               m'   = myModMask
+               ms'  = myModMask .|. shiftMask
+               mc'  = myModMask .|.               controlMask
+               msc' = myModMask .|. shiftMask .|. controlMask
 
 bindButton :: Button -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
            -> [((KeyMask,Button), (Window -> X ()))]
