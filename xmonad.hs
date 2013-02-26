@@ -267,7 +267,7 @@ keyboardMap conf = concat
     pickWorkspace    = workspacePrompt defaultXPConfig { autoComplete = Just 1 } $ \w ->
                        do s <- gets windowset
                           if W.tagMember w s
-                            then windows $ W.greedyView w
+                            then windows $ W.view w
                             else return ()
     newWorkspace     = selectWorkspace defaultXPConfig
     killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces nextWorkspace
@@ -317,7 +317,7 @@ workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
    [(mod ++ key, windows $ cmd tag)
        | (tag, key) <- zip myWorkspaces myWsShortcuts
-       , (cmd, mod) <- [(W.greedyView,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
+       , (cmd, mod) <- [(W.view,"M-"), (W.shift,"M-S-"), (swapWithCurrent,"M-C-")]]
 
 screenMap :: XConfig l -> [(String, X ())]
 screenMap conf =
