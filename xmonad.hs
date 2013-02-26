@@ -7,7 +7,7 @@ import Data.Monoid                       (All,mconcat)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
 import XMonad                            -- many
-import XMonad.Actions.CycleWS            (toggleWS, toggleOrView,moveTo,
+import XMonad.Actions.CycleWS            (moveTo,
                                           WSType(HiddenWS),Direction1D(..),
                                           shiftTo, screenBy)
 import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,
@@ -162,21 +162,20 @@ myMButMaps  = [ mouseMap ]
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
 mouseMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        shiftMaster      __               __               __
-  , k button2        focusWindow      __               __               __
-  , k button3        focusWindow      __               __               __
-  , k button4        focusUp          prevWorkspace    __               __
-  , k button5        focusDown        nextWorkspace    __               __
+  [ k button1        takeMainWindow   __               __               __
+  , k button2        __               __               __               __
+  , k button3        __               __               __               __
+  , k button4        viewPrevWindow   viewPrevWSpace   __               __
+  , k button5        viewNextWindow   viewNextWSpace   __               __
   ] 
   where
     k = bindButton
     __               = \_ -> return ()
-    nextWorkspace    = \_ -> moveTo Next HiddenWS
-    prevWorkspace    = \_ -> moveTo Prev HiddenWS
-    focusDown        = \_ -> windows W.focusDown
-    focusUp          = \_ -> windows W.focusUp
-    shiftMaster      = \w -> focus w >> windows W.shiftMaster
-    focusWindow      = \w -> focus w
+    viewNextWindow   = \_ -> windows W.focusDown
+    viewPrevWindow   = \_ -> windows W.focusUp
+    viewNextWSpace   = \_ -> moveTo Next HiddenWS
+    viewPrevWSpace   = \_ -> moveTo Prev HiddenWS
+    takeMainWindow   = \w -> focus w >> windows W.shiftMaster
 
 
 keyboardMap :: XConfig Layout -> [(String, X ())]
@@ -184,11 +183,11 @@ keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "<Esc>"        __               __               __               __
 
-  , k "`"            lastWorkspace    __               __               __
+  , k "`"            viewLastWSpace   takeLastWSpace   sendLastWSpace   __
   -- see workspaceMap for number keys
   , k "-"            __               __               __               __
   , k "="            __               __               __               __
-  , k "<Backspace>"  closeWindow      killWorkspace    __               __
+  , k "<Backspace>"  killWindow       __               __               __
 
   , k "<Tab>"        __               __               __               __
   , k "q"            restartXmonad    resetXmonad      __              quitXmonad
@@ -197,10 +196,10 @@ keyboardMap conf = concat
   , k "r"            __               __               __               __
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
-  , k "u"            prevWorkspace    atPrevWorkspace  toPrevWorkspace  __
-  , k "i"            nextWorkspace    atNextWorkspace  toNextWorkspace  __
-  , k "o"            someWorkspace    atSomeWorkspace  toSomeWorkspace  __
-  , k "p"            __               __               __               __
+  , k "u"            viewPrevWSpace   takePrevWSpace   sendPrevWSpace   __
+  , k "i"            viewNextWSpace   takeNextWSpace   sendNextWSpace   __
+  , k "o"            viewSomeWSpace   takeSomeWSpace   sendSomeWSpace   __
+  , k "p"            gotoMenu'        bringMenu'       __               __
   , k "["            __               __               __               __
   , k "]"            __               __               __               __
   , k "\\"           __               __               __               __
@@ -210,21 +209,21 @@ keyboardMap conf = concat
   , k "d"            __               __               __               __
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
-  , k "h"            prevScreen       atPrevScreen     toPrevScreen     __
-  , k "j"            focusDown        swapDown         __               __
-  , k "k"            focusUp          swapUp           __               __
-  , k "l"            nextScreen       atNextScreen     toNextScreen     __
+  , k "h"            viewPrevScreen   takePrevScreen   sendPrevScreen   __
+  , k "j"            viewNextWindow   takeNextWindow   __               __
+  , k "k"            viewPrevWindow   takePrevWindow   __               __
+  , k "l"            viewNextScreen   takeNextScreen   sendNextScreen   __
   , k ";"            __               __               __               __
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
 
   , k "z"            fullscreen       toggleStruts     __               __
   , k "x"            fetchMouse       __               __               __
-  , k "c"            newWorkspace     nameWorkspace    __               __
+  , k "c"            __               __               __               __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
-  , k "n"            gotoMenu'        bringMenu'       __               __
-  , k "m"            focusMaster      shiftMaster      __               __
+  , k "n"            newWorkspace     nameWorkspace    nukeWorkspace    __
+  , k "m"            viewMainWindow   takeMainWindow   __               __
   , k ","            incMaster        __               __               __
   , k "."            decMaster        __               __               __
   , k "/"            __               __               __               __
@@ -250,29 +249,48 @@ keyboardMap conf = concat
     resetXmonad      = restart "xmonad" False
     quitXmonad       = io $ exitWith ExitSuccess
 
-    nextScreen       = relScreen   1  W.view
-    prevScreen       = relScreen (-1) W.view
-    toNextScreen     = relScreen   1  W.shift
-    toPrevScreen     = relScreen (-1) W.shift
-    atNextScreen     = toNextScreen >> nextScreen
-    atPrevScreen     = toPrevScreen >> prevScreen
+    viewNextScreen   = relScreen   1  view
+    viewPrevScreen   = relScreen (-1) view
+    sendNextScreen   = relScreen   1  send
+    sendPrevScreen   = relScreen (-1) send
+    takeNextScreen   = sendNextScreen >> viewNextScreen
+    takePrevScreen   = sendPrevScreen >> viewPrevScreen
 
-    nextWorkspace    = moveTo  Next HiddenWS
-    prevWorkspace    = moveTo  Prev HiddenWS
-    toNextWorkspace  = shiftTo Next HiddenWS
-    toPrevWorkspace  = shiftTo Prev HiddenWS
-    atNextWorkspace  = toNextWorkspace >> nextWorkspace
-    atPrevWorkspace  = toPrevWorkspace >> prevWorkspace
+    viewNextWSpace   = moveTo  Next HiddenWS
+    viewPrevWSpace   = moveTo  Prev HiddenWS
+    sendNextWSpace   = shiftTo Next HiddenWS
+    sendPrevWSpace   = shiftTo Prev HiddenWS
+    takeNextWSpace   = sendNextWSpace >> viewNextWSpace
+    takePrevWSpace   = sendPrevWSpace >> viewPrevWSpace
 
-    pickWorkspace    = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
-    someWorkspace    = pickWorkspace (windows . W.view)
-    toSomeWorkspace  = pickWorkspace (windows . W.shift)
-    atSomeWorkspace  = pickWorkspace (\w -> (windows . W.shift) w >> (windows . W.view) w)
+    viewSomeWSpace   = withSomeWS view
+    sendSomeWSpace   = withSomeWS send
+    takeSomeWSpace   = withSomeWS take
 
-    lastWorkspace    = toggleWS
+    viewLastWSpace   = withLastWS view
+    sendLastWSpace   = withLastWS send
+    takeLastWSpace   = withLastWS take
+
     newWorkspace     = selectWorkspace defaultXPConfig
-    killWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces nextWorkspace
     nameWorkspace    = renameWorkspace defaultXPConfig
+    nukeWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces viewNextWSpace
+
+    killWindow       = kill
+    sinkWindow       = withFocused sink
+    gotoMenu'        = gotoMenu
+    bringMenu'       = bringMenu
+
+    viewNextWindow   = windows W.focusDown
+    viewPrevWindow   = windows W.focusUp
+    viewMainWindow   = windows W.focusMaster
+    takeNextWindow   = windows W.swapDown
+    takePrevWindow   = windows W.swapUp
+    takeMainWindow   = windows W.shiftMaster
+
+    view             = windows . W.view
+    send             = windows . W.shift
+    sink             = windows . W.sink
+    take             = \w -> send w >> view w
 
     refresh'         = refresh
     firstLayout      = setLayout $ layoutHook conf
@@ -285,16 +303,7 @@ keyboardMap conf = concat
     shrinkSlave      = sendMessage ShrinkSlave
     incMaster        = sendMessage (IncMasterN 1)
     decMaster        = sendMessage (IncMasterN (-1))
-    closeWindow      = kill
-    sinkWindow       = withFocused $ windows . W.sink
-    gotoMenu'        = gotoMenu
-    bringMenu'       = bringMenu
-    focusDown        = windows W.focusDown
-    swapDown         = windows W.swapDown
-    focusUp          = windows W.focusUp
-    swapUp           = windows W.swapUp
-    shiftMaster      = windows W.shiftMaster
-    focusMaster      = windows W.focusMaster
+
     openTerminal     = spawn $ terminal conf
     openChrome       = spawn "google-chrome"
     openDmenu        = spawn "dmenu_run"
@@ -302,10 +311,13 @@ keyboardMap conf = concat
     searchSelection  = selectSearch google
     fetchMouse       = warpToWindow 0.5 0.5
 
+    withLastWS f = gets (W.tag . head . W.hidden . windowset) >>= f
+    withSomeWS   = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
+
     relScreen n f = return n
                 >>= screenBy
                 >>= screenWorkspace
-                >>= flip whenJust (windows . f)
+                >>= flip whenJust f
 
 functionMap :: XConfig l -> [((KeyMask, KeySym), X ())]
 functionMap conf = concat
