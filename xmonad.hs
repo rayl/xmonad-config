@@ -397,29 +397,51 @@ focusedTitleOnScreen n = do
         t  = maybe Nothing
                    (W.stack . W.workspace)
                    s
-    n <- maybe (return "<empty>")
+    m <- maybe (return "<empty>")
                (fmap show . getName . W.focus)
                t
-    return (\_ -> n)
+    let x = if n == (W.screen . W.current) ws
+               then xmobarColor "black" "green" . wrap "  " "  " $ m
+               else xmobarColor "grey"  ""      . wrap "  " "  " $ m
+    return (\_ -> x)
+
+workspaceOnScreen :: ScreenId -> X (String -> String)
+workspaceOnScreen n = do
+    ws <- gets windowset
+    let ss = (W.current ws) : (W.visible ws)
+        s  = L.find ((n==) . W.screen) ss
+        t  = maybe "???"
+                   (W.tag . W.workspace)
+                   s
+        c  = (W.tag . W.workspace . W.current) ws
+        x = if t == c
+              then xmobarColor "white" "blue" . wrap "  " "  " $ (map toUpper t)
+              else xmobarColor "white" ""     . wrap "  " "  " $ t
+    return (\_ -> x)
 
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = do
     g0 <- focusedTitleOnScreen 0
     g1 <- focusedTitleOnScreen 1
+    h0 <- workspaceOnScreen 0
+    h1 <- workspaceOnScreen 1
+
     id $  logHook c
-      <+> dynamicLogWithPP (topPP u0 g0)
-      <+> dynamicLogWithPP (topPP u1 g1)
+      <+> dynamicLogWithPP (topPP u0 g0 h0)
+      <+> dynamicLogWithPP (topPP u1 g1 h1)
+      <+> dynamicLogWithPP bottomPP
       <+> dynamicLogWithPP bottomPP
 
              where
-                topPP h f = defaultPP
-                   { ppOutput   = hPutStrLn h
+                topPP u g h = defaultPP
+                   { ppOutput   = hPutStrLn u
                    , ppOrder    = \(ws:l:t:_) -> [ws,t]
-                   , ppCurrent  = xmobarColor "white"  "blue" . wrap " " " "
+                   , ppCurrent  = h
                    , ppVisible  = const ""
                    , ppHidden   = const ""
                    , ppHiddenNoWindows = const ""
-                   , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . f
+                   , ppWsSep    = ""
+                   , ppTitle    = g
                    }
 
                 bottomPP = defaultPP
