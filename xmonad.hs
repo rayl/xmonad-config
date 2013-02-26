@@ -294,6 +294,32 @@ keyboardMap conf = concat
             >>= screenWorkspace
             >>= flip whenJust (windows . f)
 
+functionMap :: XConfig l -> [((KeyMask, KeySym), X ())]
+functionMap conf = concat
+  --  keysym         M-               M-S-             M-C-             M-S-C-
+  [ k xK_F1          (viewScreen 0)   (toScreen 0)     __               __
+  , k xK_F2          (viewScreen 1)   (toScreen 1)     __               __
+  , k xK_F3          __               __               __               __
+  , k xK_F4          __               __               __               __
+  , k xK_F5          __               __               __               __
+  , k xK_F6          __               __               __               __
+  , k xK_F7          __               __               __               __
+  , k xK_F8          __               __               __               __
+  , k xK_F9          __               __               __               __
+  , k xK_F10         __               __               __               __
+  , k xK_F11         __               __               __               __
+  , k xK_F12         __               __               __               __
+  ] 
+  where
+    k = bindKeySym
+    __               = return ()
+    viewScreen s     = withWindowSet $ \ws ->
+                         whenJust (W.lookupWorkspace s ws)
+                                  (windows . W.view)
+    toScreen s       = withWindowSet $ \ws ->
+                         whenJust (W.lookupWorkspace s ws)
+                                  (windows . W.shift)
+
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
    [(mod ++ key, windows $ cmd tag)
