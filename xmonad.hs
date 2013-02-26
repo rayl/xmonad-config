@@ -2,7 +2,7 @@
 import Data.Char                         (toUpper)
 import Data.Function                     (on)
 import qualified Data.List as L          (intersperse,find)
-import qualified Data.Map as M           (Map,fromList,lookup)
+import qualified Data.Map as M           (Map,fromList,lookup,union)
 import Data.Monoid                       (All,mconcat)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
@@ -151,9 +151,12 @@ myHandleEventHook c =  handleEventHook c
 -- BINDINGS
 ------------------------------------------------------------------------
 myModMask   =   mod4Mask
-myKeyMaps   = [ keyboardMap, workspaceMap ]
-myMouseMaps = [ mouseMap ] 
+
 myWsShortcuts = map show $ [1..9] ++ [0]
+
+myKStrMaps  = [ keyboardMap, workspaceMap ]
+myKSymMaps  = [ functionMap ]
+myMButMaps  = [ mouseMap ] 
 
 
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
@@ -366,10 +369,13 @@ bindButton but m ms mc msc =
                msc' = myModMask .|. shiftMask .|. controlMask
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf = mkKeymap conf $ concat $ map ($ conf) myKeyMaps
+myKeys conf = M.union smap kmap
+              where
+                smap = mkKeymap conf $ concat $ map ($ conf) myKStrMaps
+                kmap = M.fromList $ concat $ map ($ conf) myKSymMaps
 
 myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings conf = M.fromList $ concat $ map ($ conf) myMouseMaps
+myMouseBindings conf = M.fromList $ concat $ map ($ conf) myMButMaps
 
 
 ------------------------------------------------------------------------
