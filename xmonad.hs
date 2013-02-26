@@ -406,46 +406,37 @@ myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = do
     g0 <- focusedTitleOnScreen 0
     g1 <- focusedTitleOnScreen 1
-    id $ logHook c
+    id $  logHook c
+      <+> dynamicLogWithPP (topPP u0 g0)
+      <+> dynamicLogWithPP (topPP u1 g1)
+      <+> dynamicLogWithPP bottomPP
 
-         -- top status bar 0
-         <+> dynamicLogWithPP defaultPP
-             { ppOutput   = hPutStrLn u0
-             , ppOrder    = \(ws:l:t:_) -> [ws,t]
-             , ppCurrent  = xmobarColor "white"  "blue" . wrap " " " "
-             , ppVisible  = const ""
-             , ppHidden   = const ""
-             , ppHiddenNoWindows = const ""
-             , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g0
-             }
-
-         -- top status bar 1
-         <+> dynamicLogWithPP defaultPP
-             { ppOutput   = hPutStrLn u1
-             , ppOrder    = \(ws:l:t:_) -> [ws,t]
-             , ppCurrent  = xmobarColor "white"  "blue" . wrap " " " "
-             , ppVisible  = const ""
-             , ppHidden   = const ""
-             , ppHiddenNoWindows = const ""
-             , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . g1
-             }
-
-         -- bottom status bar 0 and 1
-         <+> dynamicLogWithPP defaultPP
-             { ppOutput   = \s -> hPutStrLn d0 s >> hPutStrLn d1 s
-             , ppOrder    = \(ws:l:t:_) -> [l,ws]
-             , ppSep      = " "
-             , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
-             , ppWsSep    = " "
-             , ppSort     = mkWsSort cmp
-             , ppCurrent  = xmobarColor "black"  "yellow" . wrap " " " " . shortcut
-             , ppVisible  = xmobarColor "green"   "" . shortcut
-             , ppHidden   = xmobarColor "white"  "" . shortcut
-             , ppHiddenNoWindows =
-                            xmobarColor "#444"   "black" . shortcut
-             , ppUrgent   = xmobarColor "black"  "red" . wrap " " " " . shortcut
-             }
              where
+                topPP h f = defaultPP
+                   { ppOutput   = hPutStrLn h
+                   , ppOrder    = \(ws:l:t:_) -> [ws,t]
+                   , ppCurrent  = xmobarColor "white"  "blue" . wrap " " " "
+                   , ppVisible  = const ""
+                   , ppHidden   = const ""
+                   , ppHiddenNoWindows = const ""
+                   , ppTitle    = xmobarColor "black"  "green" . wrap "  " "  " . f
+                   }
+
+                bottomPP = defaultPP
+                   { ppOutput   = \s -> hPutStrLn d0 s >> hPutStrLn d1 s
+                   , ppOrder    = \(ws:l:t:_) -> [l,ws]
+                   , ppSep      = " "
+                   , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
+                   , ppWsSep    = " "
+                   , ppSort     = mkWsSort cmp
+                   , ppCurrent  = xmobarColor "black"  "yellow" . wrap " " " " . shortcut
+                   , ppVisible  = xmobarColor "green"   "" . shortcut
+                   , ppHidden   = xmobarColor "white"  "" . shortcut
+                   , ppHiddenNoWindows =
+                                  xmobarColor "#444"   "black" . shortcut
+                   , ppUrgent   = xmobarColor "black"  "red" . wrap " " " " . shortcut
+                   }
+
                 shortcut x = case (M.lookup x labels) of
                                 Just i  -> i ++ "-" ++ x
                                 Nothing -> x
