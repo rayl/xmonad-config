@@ -22,7 +22,7 @@ import XMonad.Hooks.EwmhDesktops         (ewmh,fullscreenEventHook)
 import XMonad.Hooks.ManageDocks          (manageDocks,docksEventHook,
                                           avoidStruts,ToggleStruts(..))
 import XMonad.Hooks.SetWMName            (setWMName)
-import XMonad.Hooks.UrgencyHook          (withUrgencyHook, NoUrgencyHook(..))
+import XMonad.Hooks.UrgencyHook          (withUrgencyHook, NoUrgencyHook(..),focusUrgent)
 import XMonad.Layout.IM                  (withIM,Property(Role))
 import XMonad.Layout.MouseResizableTile  (mouseResizableTile, draggerType,
                                           DraggerType(BordersDragger),
@@ -181,7 +181,7 @@ mouseMap conf = concat
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "<Esc>"        __               __               __               __
+  [ k "<Esc>"        viewUrgnWSpace   __               __               __
 
   , k "`"            viewLastWSpace   takeLastWSpace   sendLastWSpace   __
   -- see workspaceMap for number keys
@@ -270,6 +270,8 @@ keyboardMap conf = concat
     viewLastWSpace   = withLastWS view
     sendLastWSpace   = withLastWS send
     takeLastWSpace   = withLastWS take
+
+    viewUrgnWSpace   = focusUrgent
 
     newWorkspace     = selectWorkspace defaultXPConfig
     nameWorkspace    = renameWorkspace defaultXPConfig
