@@ -431,7 +431,6 @@ myLogHook c u0 d0 u1 d1 = do
       <+> dynamicLogWithPP (topPP u0 g0 h0)
       <+> dynamicLogWithPP (topPP u1 g1 h1)
       <+> dynamicLogWithPP bottomPP
-      <+> dynamicLogWithPP bottomPP
 
              where
                 topPP u g h = defaultPP
