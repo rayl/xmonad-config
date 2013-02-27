@@ -1,3 +1,16 @@
+{- |
+Module      :  xmonad.hs
+Description :  Ray's XMonad configuration
+Copyright   :  (c) 2013 Ray Lehtiniemi
+License     :  BSD3-style (see LICENSE)
+
+Maintainer  :  rayl@mail.com
+Stability   :  unstable
+Portability :  non-portable
+
+This is my attempt to find a better desktop Linux experience while
+simultaneously learning Haskell.
+-}
 
 import Data.Char                         (toUpper)
 import Data.Function                     (on)
