@@ -161,34 +161,39 @@ myMButMaps  = [ mouseMap ]
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
 mouseMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        zoomWindow       shrinkMaster     incMaster        openTerminal
-  , k button2        __               takeMainWindow   nextLayout       __
-  , k button3        toggleStruts     expandMaster     decMaster        killWindow
+  [ k button1        zoomWindow       openTerminal     incMaster        shrinkMaster
+  , k button2        viewNextScreen   takeNextScreen   nextLayout       takeMainWindow
+  , k button3        toggleStruts     killWindow       decMaster        expandMaster
   , k button4        viewPrevWindow   takePrevWindow   viewPrevWSpace   takePrevWSpace
   , k button5        viewNextWindow   takeNextWindow   viewNextWSpace   takeNextWSpace
   ] 
   where
     k = bindButton
-    __               = d $ return ()
+    --__             = \_ -> return ()
 
     viewNextWindow   = a $ W.focusDown
     viewPrevWindow   = a $ W.focusUp
     takeNextWindow   = a $ W.swapDown
     takePrevWindow   = a $ W.swapUp
-    takeMainWindow   = a $ W.shiftMaster
 
     viewNextWSpace   = b $ viewNextWS
     viewPrevWSpace   = b $ viewPrevWS
     takeNextWSpace   = b $ sendNextWS >> viewNextWS
     takePrevWSpace   = b $ sendPrevWS >> viewPrevWS
 
+    viewNextScreen   = b $ relScreen 1 view
+    takeNextScreen   = b $ relScreen 1 take
+
     zoomWindow       = c $ (Toggle ZOOM)
     toggleStruts     = c $ ToggleStruts
+
     nextLayout       = c $ NextLayout
     incMaster        = c $ (IncMasterN 1)
     decMaster        = c $ (IncMasterN (-1))
+
     expandMaster     = c $ Expand
     shrinkMaster     = c $ Shrink
+    takeMainWindow   = a $ W.shiftMaster
 
     openTerminal     = d $ spawn $ terminal conf
     killWindow       = d $ kill
@@ -199,10 +204,19 @@ mouseMap conf = concat
     sendPrevWS       = shiftTo Prev HiddenWS
     fetchMouse       = warpToWindow 0.5 0.5
 
+    view             = windows . W.view
+    send             = windows . W.shift
+    take             = \w -> send w >> view w
+
     a x  = \_ -> windows x >> fetchMouse
     b x  = \_ -> x >> fetchMouse
     c x  = \w -> sendMessage x
     d x  = \w -> x
+
+    relScreen n f = return n
+                >>= screenBy
+                >>= screenWorkspace
+                >>= flip whenJust f
 
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
