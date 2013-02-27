@@ -153,9 +153,8 @@ myModMask   =   mod4Mask
 
 myWsShortcuts = map show $ [1..9] ++ [0]
 
-myKStrMaps  = [ navigationMap, shortcutMap, keyboardMap ]
-myKSymMaps  = [ functionMap ]
-myMButMaps  = [ mouseMap ] 
+myKeymaps  = [ navigationMap, shortcutMap, keyboardMap ]
+myButmaps  = [ mouseMap ] 
 
 
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
@@ -372,39 +371,6 @@ keyboardMap conf = concat
     __ = return ()
     k = bindString
 
-functionMap :: XConfig l -> [((KeyMask, KeySym), X ())]
-functionMap conf = concat
-  --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k xK_F1          (viewScreen 0)   (dragScreen 0)   (sendScreen 0)   __
-  , k xK_F2          (viewScreen 1)   (dragScreen 1)   (sendScreen 1)   __
-  , k xK_F3          __               __               __               __
-  , k xK_F4          __               __               __               __
-  , k xK_F5          __               __               __               __
-  , k xK_F6          __               __               __               __
-  , k xK_F7          __               __               __               __
-  , k xK_F8          __               __               __               __
-  , k xK_F9          __               __               __               __
-  , k xK_F10         __               __               __               __
-  , k xK_F11         __               __               __               __
-  , k xK_F12         __               __               __               __
-  ] 
-  where
-
-    viewScreen s     = absScreen s view
-    sendScreen s     = absScreen s send
-    dragScreen s     = absScreen s drag
-
-    view             = windows . W.view
-    send             = windows . W.shift
-    drag             = \w -> send w >> view w
-
-    absScreen n f    = return n
-                   >>= screenWorkspace
-                   >>= flip whenJust f
-
-    __ = return ()
-    k = bindKeySym
-
 shortcutMap :: XConfig l -> [(String, X ())]
 shortcutMap conf =
         [(mod ++ key, cmd $ tag)
@@ -426,20 +392,6 @@ bindString key m ms mc msc =
            where
                bind mod key cmd = (mod ++ key, cmd)
 
-bindKeySym :: KeySym -> X () -> X () -> X () -> X () -> [((KeyMask,KeySym), X ())]
-bindKeySym key m ms mc msc =
-        [ bind m'    key m
-        , bind ms'   key ms
-        , bind mc'   key mc
-        , bind msc'  key msc
-        ]
-           where
-               bind mod key cmd = ((mod,key), cmd)
-               m'   = myModMask
-               ms'  = myModMask .|. shiftMask
-               mc'  = myModMask .|.               controlMask
-               msc' = myModMask .|. shiftMask .|. controlMask
-
 bindButton :: Button -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
            -> [((KeyMask,Button), (Window -> X ()))]
 bindButton but m ms mc msc =
@@ -456,13 +408,10 @@ bindButton but m ms mc msc =
                msc' = myModMask .|. shiftMask .|. controlMask
 
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf = M.union smap kmap
-              where
-                smap = mkKeymap conf $ concat $ map ($ conf) myKStrMaps
-                kmap = M.fromList $ concat $ map ($ conf) myKSymMaps
+myKeys conf = mkKeymap conf $ concat $ map ($ conf) myKeymaps
 
 myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings conf = M.fromList $ concat $ map ($ conf) myMButMaps
+myMouseBindings conf = M.fromList $ concat $ map ($ conf) myButmaps
 
 
 ------------------------------------------------------------------------
