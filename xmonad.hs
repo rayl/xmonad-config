@@ -184,12 +184,12 @@ mouseMap conf = concat
     viewNextScreen   = b $ relScreen 1 view
     takeNextScreen   = b $ relScreen 1 take
 
-    zoomWindow       = c $ (Toggle ZOOM)
+    zoomWindow       = c $ Toggle ZOOM
     toggleStruts     = c $ ToggleStruts
 
     nextLayout       = c $ NextLayout
-    incMaster        = c $ (IncMasterN 1)
-    decMaster        = c $ (IncMasterN (-1))
+    incMaster        = c $ IncMasterN 1
+    decMaster        = c $ IncMasterN (-1)
 
     expandMaster     = c $ Expand
     shrinkMaster     = c $ Shrink
