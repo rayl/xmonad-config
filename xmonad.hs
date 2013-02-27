@@ -162,25 +162,25 @@ mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
 mouseMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
   [ k button1        zoomWindow       openTerminal     incMaster        shrinkMaster
-  , k button2        viewNextScreen   takeNextScreen   nextLayout       takeMainWindow
+  , k button2        viewNextScreen   dragNextScreen   nextLayout       dragMainWindow
   , k button3        toggleStruts     killWindow       decMaster        expandMaster
-  , k button4        viewPrevWindow   takePrevWindow   viewPrevWSpace   takePrevWSpace
-  , k button5        viewNextWindow   takeNextWindow   viewNextWSpace   takeNextWSpace
+  , k button4        viewPrevWindow   dragPrevWindow   viewPrevWSpace   dragPrevWSpace
+  , k button5        viewNextWindow   dragNextWindow   viewNextWSpace   dragNextWSpace
   ] 
   where
 
     viewNextWindow   = a $ W.focusDown
     viewPrevWindow   = a $ W.focusUp
-    takeNextWindow   = a $ W.swapDown
-    takePrevWindow   = a $ W.swapUp
+    dragNextWindow   = a $ W.swapDown
+    dragPrevWindow   = a $ W.swapUp
 
     viewNextWSpace   = b $ viewNextWS
     viewPrevWSpace   = b $ viewPrevWS
-    takeNextWSpace   = b $ sendNextWS >> viewNextWS
-    takePrevWSpace   = b $ sendPrevWS >> viewPrevWS
+    dragNextWSpace   = b $ sendNextWS >> viewNextWS
+    dragPrevWSpace   = b $ sendPrevWS >> viewPrevWS
 
     viewNextScreen   = b $ relScreen 1 view
-    takeNextScreen   = b $ relScreen 1 take
+    dragNextScreen   = b $ relScreen 1 drag
 
     zoomWindow       = c $ Toggle ZOOM
     toggleStruts     = c $ ToggleStruts
@@ -191,7 +191,7 @@ mouseMap conf = concat
 
     expandMaster     = c $ Expand
     shrinkMaster     = c $ Shrink
-    takeMainWindow   = a $ W.shiftMaster
+    dragMainWindow   = a $ W.shiftMaster
 
     openTerminal     = d $ spawn $ terminal conf
     killWindow       = d $ kill
@@ -204,7 +204,7 @@ mouseMap conf = concat
 
     view             = windows . W.view
     send             = windows . W.shift
-    take             = \w -> send w >> view w
+    drag             = \w -> send w >> view w
 
     relScreen n f    = return n
                    >>= screenBy
@@ -224,7 +224,7 @@ keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "<Esc>"        viewUrgnWSpace   __               __               __
 
-  , k "`"            viewLastWSpace   takeLastWSpace   sendLastWSpace   __
+  , k "`"            viewLastWSpace   dragLastWSpace   sendLastWSpace   __
   --                 see workspaceMap for number keys
   , k "-"            __               __               __               __
   , k "="            __               __               __               __
@@ -237,9 +237,9 @@ keyboardMap conf = concat
   , k "r"            __               __               __               __
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
-  , k "u"            viewPrevWSpace   takePrevWSpace   sendPrevWSpace   __
-  , k "i"            viewNextWSpace   takeNextWSpace   sendNextWSpace   __
-  , k "o"            viewSomeWSpace   takeSomeWSpace   sendSomeWSpace   __
+  , k "u"            viewPrevWSpace   dragPrevWSpace   sendPrevWSpace   __
+  , k "i"            viewNextWSpace   dragNextWSpace   sendNextWSpace   __
+  , k "o"            viewSomeWSpace   dragSomeWSpace   sendSomeWSpace   __
   , k "p"            gotoMenu'        bringMenu'       __               __
   , k "["            __               __               __               __
   , k "]"            __               __               __               __
@@ -251,9 +251,9 @@ keyboardMap conf = concat
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
   , k "h"            __               __               __               __
-  , k "j"            viewNextWindow   takeNextWindow   __               __
-  , k "k"            viewPrevWindow   takePrevWindow   __               __
-  , k "l"            viewNextScreen   takeNextScreen   sendNextScreen   __
+  , k "j"            viewNextWindow   dragNextWindow   __               __
+  , k "k"            viewPrevWindow   dragPrevWindow   __               __
+  , k "l"            viewNextScreen   dragNextScreen   sendNextScreen   __
   , k ";"            __               __               __               __
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
@@ -264,7 +264,7 @@ keyboardMap conf = concat
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
   , k "n"            newWorkspace     nameWorkspace    nukeWorkspace    __
-  , k "m"            viewMainWindow   takeMainWindow   __               __
+  , k "m"            viewMainWindow   dragMainWindow   __               __
   , k ","            incMaster        __               __               __
   , k "."            decMaster        __               __               __
   , k "/"            __               __               __               __
@@ -290,22 +290,22 @@ keyboardMap conf = concat
 
     viewNextScreen   = relScreen   1  view
     sendNextScreen   = relScreen   1  send
-    takeNextScreen   = sendNextScreen >> viewNextScreen
+    dragNextScreen   = sendNextScreen >> viewNextScreen
 
     viewNextWSpace   = moveTo  Next HiddenWS
     viewPrevWSpace   = moveTo  Prev HiddenWS
     sendNextWSpace   = shiftTo Next HiddenWS
     sendPrevWSpace   = shiftTo Prev HiddenWS
-    takeNextWSpace   = sendNextWSpace >> viewNextWSpace
-    takePrevWSpace   = sendPrevWSpace >> viewPrevWSpace
+    dragNextWSpace   = sendNextWSpace >> viewNextWSpace
+    dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
 
     viewSomeWSpace   = withSomeWS view
     sendSomeWSpace   = withSomeWS send
-    takeSomeWSpace   = withSomeWS take
+    dragSomeWSpace   = withSomeWS drag
 
     viewLastWSpace   = withLastWS view
     sendLastWSpace   = withLastWS send
-    takeLastWSpace   = withLastWS take
+    dragLastWSpace   = withLastWS drag
 
     viewUrgnWSpace   = focusUrgent
 
@@ -321,13 +321,13 @@ keyboardMap conf = concat
     viewNextWindow   = windows W.focusDown
     viewPrevWindow   = windows W.focusUp
     viewMainWindow   = windows W.focusMaster
-    takeNextWindow   = windows W.swapDown
-    takePrevWindow   = windows W.swapUp
-    takeMainWindow   = windows W.shiftMaster
+    dragNextWindow   = windows W.swapDown
+    dragPrevWindow   = windows W.swapUp
+    dragMainWindow   = windows W.shiftMaster
 
     view             = windows . W.view
     send             = windows . W.shift
-    take             = \w -> send w >> view w
+    drag             = \w -> send w >> view w
     sink             = windows . W.sink
 
     refresh'         = refresh
@@ -363,8 +363,8 @@ keyboardMap conf = concat
 functionMap :: XConfig l -> [((KeyMask, KeySym), X ())]
 functionMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k xK_F1          (viewScreen 0)   (takeScreen 0)   (sendScreen 0)   __
-  , k xK_F2          (viewScreen 1)   (takeScreen 1)   (sendScreen 1)   __
+  [ k xK_F1          (viewScreen 0)   (dragScreen 0)   (sendScreen 0)   __
+  , k xK_F2          (viewScreen 1)   (dragScreen 1)   (sendScreen 1)   __
   , k xK_F3          __               __               __               __
   , k xK_F4          __               __               __               __
   , k xK_F5          __               __               __               __
@@ -380,11 +380,11 @@ functionMap conf = concat
 
     viewScreen s     = absScreen s view
     sendScreen s     = absScreen s send
-    takeScreen s     = absScreen s take
+    dragScreen s     = absScreen s drag
 
     view             = windows . W.view
     send             = windows . W.shift
-    take             = \w -> send w >> view w
+    drag             = \w -> send w >> view w
 
     absScreen n f    = return n
                    >>= screenWorkspace
@@ -399,10 +399,10 @@ workspaceMap conf =
               | (tag, key) <- zip myWorkspaces myWsShortcuts
               , (mod, cmd) <- actions]
            where
-               actions = [("M-",view),("M-S-",take),("M-C-",send)]
+               actions = [("M-",view),("M-S-",drag),("M-C-",send)]
                view    = windows . W.view
                send    = windows . W.shift
-               take    = \w -> send w >> view w
+               drag    = \w -> send w >> view w
 
 bindString :: String -> X () -> X () -> X () -> X () -> [(String, X ())]
 bindString key m ms mc msc =
