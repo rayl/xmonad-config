@@ -270,13 +270,15 @@ navigationMap conf = concat
     send             = windows . W.shift
     drag             = \w -> send w >> view w
 
-    withLastWS f     = gets (W.tag . head . W.hidden . windowset) >>= f
+    withLastWS f     = gets ((dfl W.tag "") . W.hidden . windowset) >>= f
     withSomeWS       = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
 
     relScreen n f    = return n
                    >>= screenBy
                    >>= screenWorkspace
                    >>= flip whenJust f
+
+    dfl f d l = case l of [] -> d; w:ws -> f w
 
     __ = return ()
     k = bindString
