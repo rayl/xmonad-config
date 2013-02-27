@@ -227,7 +227,7 @@ keyboardMap conf = concat
   , k "."            decMaster        __               __               __
   , k "/"            __               __               __               __
 
-  , k "<Space>"      nextLayout       firstLayout      __               refresh'
+  , k "<Space>"      nextLayout       resetLayout      __               refresh'
 
   , k "<Home>"       __               __               __               __
   , k "<End>"        __               __               __               __
@@ -294,7 +294,7 @@ keyboardMap conf = concat
     sink             = windows . W.sink
 
     refresh'         = refresh
-    firstLayout      = setLayout $ layoutHook conf
+    resetLayout      = setLayout $ layoutHook conf
     nextLayout       = sendMessage NextLayout
     fullscreen       = sendMessage (Toggle ZOOM)
     toggleStruts     = sendMessage ToggleStruts
