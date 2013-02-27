@@ -153,7 +153,7 @@ myModMask   =   mod4Mask
 
 myWsShortcuts = map show $ [1..9] ++ [0]
 
-myKStrMaps  = [ keyboardMap, workspaceMap ]
+myKStrMaps  = [ navigationMap, shortcutMap, keyboardMap ]
 myKSymMaps  = [ functionMap ]
 myMButMaps  = [ mouseMap ] 
 
@@ -219,14 +219,71 @@ mouseMap conf = concat
     --__ = \_ -> return ()
     k = bindButton
 
+navigationMap :: XConfig Layout -> [(String, X ())]
+navigationMap conf = concat
+  --  keysym         M-               M-S-             M-C-             M-S-C-
+  [ k "<Esc>"        viewUrgnWSpace   __               __               __
+  , k "`"            viewLastWSpace   dragLastWSpace   sendLastWSpace   __
+  , k "u"            viewPrevWSpace   dragPrevWSpace   sendPrevWSpace   __
+  , k "i"            viewNextWSpace   dragNextWSpace   sendNextWSpace   __
+  , k "o"            viewSomeWSpace   dragSomeWSpace   sendSomeWSpace   __
+  , k "j"            viewNextWindow   dragNextWindow   __               __
+  , k "k"            viewPrevWindow   dragPrevWindow   __               __
+  , k "l"            viewNextScreen   dragNextScreen   sendNextScreen   __
+  , k "m"            viewMainWindow   dragMainWindow   __               __
+  ]
+  where
+
+    viewNextWindow   = windows W.focusDown
+    dragNextWindow   = windows W.swapDown
+
+    viewPrevWindow   = windows W.focusUp
+    dragPrevWindow   = windows W.swapUp
+
+    viewMainWindow   = windows W.focusMaster
+    dragMainWindow   = windows W.shiftMaster
+
+    viewNextScreen   = relScreen 1 view
+    dragNextScreen   = sendNextScreen >> viewNextScreen
+    sendNextScreen   = relScreen 1 send
+
+    viewPrevWSpace   = moveTo Prev HiddenWS
+    dragNextWSpace   = sendNextWSpace >> viewNextWSpace
+    sendPrevWSpace   = shiftTo Prev HiddenWS
+
+    viewNextWSpace   = moveTo Next HiddenWS
+    dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
+    sendNextWSpace   = shiftTo Next HiddenWS
+
+    viewSomeWSpace   = withSomeWS view
+    dragSomeWSpace   = withSomeWS drag
+    sendSomeWSpace   = withSomeWS send
+
+    viewLastWSpace   = withLastWS view
+    dragLastWSpace   = withLastWS drag
+    sendLastWSpace   = withLastWS send
+
+    viewUrgnWSpace   = focusUrgent
+
+    view             = windows . W.view
+    send             = windows . W.shift
+    drag             = \w -> send w >> view w
+
+    withLastWS f     = gets (W.tag . head . W.hidden . windowset) >>= f
+    withSomeWS       = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
+
+    relScreen n f    = return n
+                   >>= screenBy
+                   >>= screenWorkspace
+                   >>= flip whenJust f
+
+    __ = return ()
+    k = bindString
+
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "<Esc>"        viewUrgnWSpace   __               __               __
-
-  , k "`"            viewLastWSpace   dragLastWSpace   sendLastWSpace   __
-  --                 see workspaceMap for number keys
-  , k "-"            __               __               __               __
+  [ k "-"            __               __               __               __
   , k "="            __               __               __               __
   , k "<Backspace>"  killWindow       __               __               __
 
@@ -237,9 +294,6 @@ keyboardMap conf = concat
   , k "r"            __               __               __               __
   , k "t"            sinkWindow       __               __               __
   , k "y"            __               __               __               __
-  , k "u"            viewPrevWSpace   dragPrevWSpace   sendPrevWSpace   __
-  , k "i"            viewNextWSpace   dragNextWSpace   sendNextWSpace   __
-  , k "o"            viewSomeWSpace   dragSomeWSpace   sendSomeWSpace   __
   , k "p"            gotoMenu'        bringMenu'       __               __
   , k "["            __               __               __               __
   , k "]"            __               __               __               __
@@ -251,9 +305,6 @@ keyboardMap conf = concat
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
   , k "h"            __               __               __               __
-  , k "j"            viewNextWindow   dragNextWindow   __               __
-  , k "k"            viewPrevWindow   dragPrevWindow   __               __
-  , k "l"            viewNextScreen   dragNextScreen   sendNextScreen   __
   , k ";"            __               __               __               __
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
@@ -264,7 +315,6 @@ keyboardMap conf = concat
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
   , k "n"            newWorkspace     nameWorkspace    nukeWorkspace    __
-  , k "m"            viewMainWindow   dragMainWindow   __               __
   , k ","            incMaster        __               __               __
   , k "."            decMaster        __               __               __
   , k "/"            __               __               __               __
@@ -288,46 +338,16 @@ keyboardMap conf = concat
     resetXmonad      = restart "xmonad" False
     quitXmonad       = io $ exitWith ExitSuccess
 
-    viewNextScreen   = relScreen   1  view
-    sendNextScreen   = relScreen   1  send
-    dragNextScreen   = sendNextScreen >> viewNextScreen
-
-    viewNextWSpace   = moveTo  Next HiddenWS
-    viewPrevWSpace   = moveTo  Prev HiddenWS
-    sendNextWSpace   = shiftTo Next HiddenWS
-    sendPrevWSpace   = shiftTo Prev HiddenWS
-    dragNextWSpace   = sendNextWSpace >> viewNextWSpace
-    dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
-
-    viewSomeWSpace   = withSomeWS view
-    sendSomeWSpace   = withSomeWS send
-    dragSomeWSpace   = withSomeWS drag
-
-    viewLastWSpace   = withLastWS view
-    sendLastWSpace   = withLastWS send
-    dragLastWSpace   = withLastWS drag
-
-    viewUrgnWSpace   = focusUrgent
-
     newWorkspace     = selectWorkspace defaultXPConfig
     nameWorkspace    = renameWorkspace defaultXPConfig
     nukeWorkspace    = removeEmptyWorkspaceAfterExcept myWorkspaces viewNextWSpace
+    viewNextWSpace   = moveTo Next HiddenWS
 
     killWindow       = kill
     sinkWindow       = withFocused sink
     gotoMenu'        = gotoMenu
     bringMenu'       = bringMenu
 
-    viewNextWindow   = windows W.focusDown
-    viewPrevWindow   = windows W.focusUp
-    viewMainWindow   = windows W.focusMaster
-    dragNextWindow   = windows W.swapDown
-    dragPrevWindow   = windows W.swapUp
-    dragMainWindow   = windows W.shiftMaster
-
-    view             = windows . W.view
-    send             = windows . W.shift
-    drag             = \w -> send w >> view w
     sink             = windows . W.sink
 
     refresh'         = refresh
@@ -348,14 +368,6 @@ keyboardMap conf = concat
     searchPrompt     = promptSearch defaultXPConfig google
     searchSelection  = selectSearch google
     fetchMouse       = warpToWindow 0.5 0.5
-
-    withLastWS f     = gets (W.tag . head . W.hidden . windowset) >>= f
-    withSomeWS       = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
-
-    relScreen n f    = return n
-                   >>= screenBy
-                   >>= screenWorkspace
-                   >>= flip whenJust f
 
     __ = return ()
     k = bindString
@@ -393,8 +405,8 @@ functionMap conf = concat
     __ = return ()
     k = bindKeySym
 
-workspaceMap :: XConfig l -> [(String, X ())]
-workspaceMap conf =
+shortcutMap :: XConfig l -> [(String, X ())]
+shortcutMap conf =
         [(mod ++ key, cmd $ tag)
               | (tag, key) <- zip myWorkspaces myWsShortcuts
               , (mod, cmd) <- actions]
