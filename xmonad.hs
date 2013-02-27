@@ -16,6 +16,7 @@ import Data.Char                         (toUpper)
 import Data.Function                     (on)
 import qualified Data.List as L          (intersperse,find)
 import qualified Data.Map as M           (Map,fromList,lookup,union)
+import Data.Maybe                        (fromMaybe)
 import Data.Monoid                       (All,mconcat)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
@@ -506,18 +507,15 @@ focusedTitleOnScreen n = do
     return (\ _ -> x)
 
 workspaceOnScreen :: ScreenId -> X (String -> String)
-workspaceOnScreen n = do
-    ws <- gets windowset
-    let ss = (W.current ws) : (W.visible ws)
-        s  = L.find ((n==) . W.screen) ss
-        t  = maybe "???"
-                   (W.tag . W.workspace)
-                   s
-        c  = (W.tag . W.workspace . W.current) ws
-        x = if t == c
-              then xmobarColor "white" "blue" . wrap "  " "  " $ (map toUpper t)
-              else xmobarColor "white" ""     . wrap "  " "  " $ t
-    return (\ _ -> x)
+workspaceOnScreen n = gets (fmt . windowset)
+   where
+      fmt s = \ _ -> txt
+         where
+            txt = if tag == foc then cur else vis
+            tag = fromMaybe "<???>" $ W.lookupWorkspace n s
+            foc = W.currentTag s
+            cur = xmobarColor "white" "blue" . wrap "  " "  " $ map toUpper tag
+            vis = xmobarColor "white" ""     . wrap "  " "  " $ tag
 
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = do
