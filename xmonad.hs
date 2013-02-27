@@ -250,7 +250,7 @@ keyboardMap conf = concat
   , k "d"            __               __               __               __
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
-  , k "h"            viewPrevScreen   takePrevScreen   sendPrevScreen   __
+  , k "h"            __               __               __               __
   , k "j"            viewNextWindow   takeNextWindow   __               __
   , k "k"            viewPrevWindow   takePrevWindow   __               __
   , k "l"            viewNextScreen   takeNextScreen   sendNextScreen   __
@@ -289,11 +289,8 @@ keyboardMap conf = concat
     quitXmonad       = io $ exitWith ExitSuccess
 
     viewNextScreen   = relScreen   1  view
-    viewPrevScreen   = relScreen (-1) view
     sendNextScreen   = relScreen   1  send
-    sendPrevScreen   = relScreen (-1) send
     takeNextScreen   = sendNextScreen >> viewNextScreen
-    takePrevScreen   = sendPrevScreen >> viewPrevScreen
 
     viewNextWSpace   = moveTo  Next HiddenWS
     viewPrevWSpace   = moveTo  Prev HiddenWS
