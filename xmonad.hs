@@ -169,17 +169,23 @@ mouseMap conf = concat
   where
 
     viewNextWindow   = a $ W.focusDown
-    viewPrevWindow   = a $ W.focusUp
     dragNextWindow   = a $ W.swapDown
+
+    viewPrevWindow   = a $ W.focusUp
     dragPrevWindow   = a $ W.swapUp
 
-    viewNextWSpace   = b $ viewNextWS
-    viewPrevWSpace   = b $ viewPrevWS
-    dragNextWSpace   = b $ sendNextWS >> viewNextWS
-    dragPrevWSpace   = b $ sendPrevWS >> viewPrevWS
+    dragMainWindow   = a $ W.shiftMaster
+    expandMaster     = c $ Expand
+    shrinkMaster     = c $ Shrink
 
     viewNextScreen   = b $ relScreen 1 view
     dragNextScreen   = b $ relScreen 1 drag
+
+    viewNextWSpace   = b $ viewNextWS
+    dragNextWSpace   = b $ sendNextWS >> viewNextWS
+
+    viewPrevWSpace   = b $ viewPrevWS
+    dragPrevWSpace   = b $ sendPrevWS >> viewPrevWS
 
     zoomWindow       = c $ Toggle ZOOM
     toggleStruts     = c $ ToggleStruts
@@ -187,10 +193,6 @@ mouseMap conf = concat
     nextLayout       = c $ NextLayout
     incMaster        = c $ IncMasterN 1
     decMaster        = c $ IncMasterN (-1)
-
-    expandMaster     = c $ Expand
-    shrinkMaster     = c $ Shrink
-    dragMainWindow   = a $ W.shiftMaster
 
     openTerminal     = d $ spawn $ terminal conf
     killWindow       = d $ kill
@@ -246,13 +248,13 @@ navigationMap conf = concat
     dragNextScreen   = sendNextScreen >> viewNextScreen
     sendNextScreen   = relScreen 1 send
 
-    viewPrevWSpace   = moveTo Prev HiddenWS
-    dragNextWSpace   = sendNextWSpace >> viewNextWSpace
-    sendPrevWSpace   = shiftTo Prev HiddenWS
-
     viewNextWSpace   = moveTo Next HiddenWS
-    dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
+    dragNextWSpace   = sendNextWSpace >> viewNextWSpace
     sendNextWSpace   = shiftTo Next HiddenWS
+
+    viewPrevWSpace   = moveTo Prev HiddenWS
+    dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
+    sendPrevWSpace   = shiftTo Prev HiddenWS
 
     viewSomeWSpace   = withSomeWS view
     dragSomeWSpace   = withSomeWS drag
