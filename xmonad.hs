@@ -161,21 +161,48 @@ myMButMaps  = [ mouseMap ]
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
 mouseMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        takeMainWindow   __               __               __
-  , k button2        __               __               __               __
-  , k button3        __               __               __               __
-  , k button4        viewPrevWindow   viewPrevWSpace   __               __
-  , k button5        viewNextWindow   viewNextWSpace   __               __
+  [ k button1        zoomWindow       shrinkMaster     incMaster        openTerminal
+  , k button2        __               takeMainWindow   nextLayout       __
+  , k button3        toggleStruts     expandMaster     decMaster        killWindow
+  , k button4        viewPrevWindow   takePrevWindow   viewPrevWSpace   takePrevWSpace
+  , k button5        viewNextWindow   takeNextWindow   viewNextWSpace   takeNextWSpace
   ] 
   where
     k = bindButton
-    __               = \_ -> return ()
-    viewNextWindow   = \_ -> windows W.focusDown
-    viewPrevWindow   = \_ -> windows W.focusUp
-    viewNextWSpace   = \_ -> moveTo Next HiddenWS
-    viewPrevWSpace   = \_ -> moveTo Prev HiddenWS
-    takeMainWindow   = \w -> focus w >> windows W.shiftMaster
+    __               = d $ return ()
 
+    viewNextWindow   = a $ W.focusDown
+    viewPrevWindow   = a $ W.focusUp
+    takeNextWindow   = a $ W.swapDown
+    takePrevWindow   = a $ W.swapUp
+    takeMainWindow   = a $ W.shiftMaster
+
+    viewNextWSpace   = b $ viewNextWS
+    viewPrevWSpace   = b $ viewPrevWS
+    takeNextWSpace   = b $ sendNextWS >> viewNextWS
+    takePrevWSpace   = b $ sendPrevWS >> viewPrevWS
+
+    zoomWindow       = c $ (Toggle ZOOM)
+    toggleStruts     = c $ ToggleStruts
+    nextLayout       = c $ NextLayout
+    incMaster        = c $ (IncMasterN 1)
+    decMaster        = c $ (IncMasterN (-1))
+    expandMaster     = c $ Expand
+    shrinkMaster     = c $ Shrink
+
+    openTerminal     = d $ spawn $ terminal conf
+    killWindow       = d $ kill
+
+    viewNextWS       = moveTo Next HiddenWS
+    viewPrevWS       = moveTo Prev HiddenWS
+    sendNextWS       = shiftTo Next HiddenWS
+    sendPrevWS       = shiftTo Prev HiddenWS
+    fetchMouse       = warpToWindow 0.5 0.5
+
+    a x  = \_ -> windows x >> fetchMouse
+    b x  = \_ -> x >> fetchMouse
+    c x  = \w -> sendMessage x
+    d x  = \w -> x
 
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
