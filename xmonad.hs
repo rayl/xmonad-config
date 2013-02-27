@@ -168,8 +168,6 @@ mouseMap conf = concat
   , k button5        viewNextWindow   takeNextWindow   viewNextWSpace   takeNextWSpace
   ] 
   where
-    k = bindButton
-    --__             = \_ -> return ()
 
     viewNextWindow   = a $ W.focusDown
     viewPrevWindow   = a $ W.focusUp
@@ -208,15 +206,18 @@ mouseMap conf = concat
     send             = windows . W.shift
     take             = \w -> send w >> view w
 
+    relScreen n f    = return n
+                   >>= screenBy
+                   >>= screenWorkspace
+                   >>= flip whenJust f
+
     a x  = \_ -> windows x >> fetchMouse
     b x  = \_ -> x >> fetchMouse
     c x  = \w -> sendMessage x
     d x  = \w -> x
 
-    relScreen n f = return n
-                >>= screenBy
-                >>= screenWorkspace
-                >>= flip whenJust f
+    --__ = \_ -> return ()
+    k = bindButton
 
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
@@ -282,8 +283,6 @@ keyboardMap conf = concat
   , k "<Right>"      expandMaster     __               __               __
   ]
   where
-    k = bindString
-    __               = return ()
 
     restartXmonad    = restart "xmonad" True
     resetXmonad      = restart "xmonad" False
@@ -353,13 +352,16 @@ keyboardMap conf = concat
     searchSelection  = selectSearch google
     fetchMouse       = warpToWindow 0.5 0.5
 
-    withLastWS f = gets (W.tag . head . W.hidden . windowset) >>= f
-    withSomeWS   = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
+    withLastWS f     = gets (W.tag . head . W.hidden . windowset) >>= f
+    withSomeWS       = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
 
-    relScreen n f = return n
-                >>= screenBy
-                >>= screenWorkspace
-                >>= flip whenJust f
+    relScreen n f    = return n
+                   >>= screenBy
+                   >>= screenWorkspace
+                   >>= flip whenJust f
+
+    __ = return ()
+    k = bindString
 
 functionMap :: XConfig l -> [((KeyMask, KeySym), X ())]
 functionMap conf = concat
@@ -378,18 +380,21 @@ functionMap conf = concat
   , k xK_F12         __               __               __               __
   ] 
   where
-    k = bindKeySym
-    __               = return ()
+
     viewScreen s     = absScreen s view
     sendScreen s     = absScreen s send
     takeScreen s     = absScreen s take
+
     view             = windows . W.view
     send             = windows . W.shift
     take             = \w -> send w >> view w
 
-    absScreen n f = return n
-                >>= screenWorkspace
-                >>= flip whenJust f
+    absScreen n f    = return n
+                   >>= screenWorkspace
+                   >>= flip whenJust f
+
+    __ = return ()
+    k = bindKeySym
 
 workspaceMap :: XConfig l -> [(String, X ())]
 workspaceMap conf =
