@@ -218,19 +218,19 @@ mouseMap conf = concat
 
     view             = windows . W.view
     send             = windows . W.shift
-    drag             = \w -> send w >> view w
+    drag             = \ w -> send w >> view w
 
     relScreen n f    = return n
                    >>= screenBy
                    >>= screenWorkspace
                    >>= flip whenJust f
 
-    a x  = \_ -> windows x >> fetchMouse
-    b x  = \_ -> x >> fetchMouse
-    c x  = \w -> sendMessage x
-    d x  = \w -> x
+    a x  = \ _ -> windows x >> fetchMouse
+    b x  = \ _ -> x >> fetchMouse
+    c x  = \ w -> sendMessage x
+    d x  = \ w -> x
 
-    --__ = \_ -> return ()
+    --__ = \ _ -> return ()
     k = bindButton
 
 navigationMap :: XConfig Layout -> [(String, X ())]
@@ -281,7 +281,7 @@ navigationMap conf = concat
 
     view             = windows . W.view
     send             = windows . W.shift
-    drag             = \w -> send w >> view w
+    drag             = \ w -> send w >> view w
 
     withLastWS f     = gets ((dfl W.tag "") . W.hidden . windowset) >>= f
     withSomeWS       = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
@@ -397,7 +397,7 @@ shortcutMap conf =
                actions = [("M-",view),("M-S-",drag),("M-C-",send)]
                view    = windows . W.view
                send    = windows . W.shift
-               drag    = \w -> send w >> view w
+               drag    = \ w -> send w >> view w
 
 bindString :: String -> X () -> X () -> X () -> X () -> [(String, X ())]
 bindString key m ms mc msc =
@@ -503,7 +503,7 @@ focusedTitleOnScreen n = do
     let x = if n == (W.screen . W.current) ws
                then xmobarColor "black" "green" . wrap "  " "  " $ m
                else xmobarColor "grey"  ""      . wrap "  " "  " $ m
-    return (\_ -> x)
+    return (\ _ -> x)
 
 workspaceOnScreen :: ScreenId -> X (String -> String)
 workspaceOnScreen n = do
@@ -517,7 +517,7 @@ workspaceOnScreen n = do
         x = if t == c
               then xmobarColor "white" "blue" . wrap "  " "  " $ (map toUpper t)
               else xmobarColor "white" ""     . wrap "  " "  " $ t
-    return (\_ -> x)
+    return (\ _ -> x)
 
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = do
@@ -534,7 +534,7 @@ myLogHook c u0 d0 u1 d1 = do
              where
                 topPP u g h = defaultPP
                    { ppOutput   = hPutStrLn u
-                   , ppOrder    = \(ws:l:t:_) -> [ws,t]
+                   , ppOrder    = \ (ws:l:t:_) -> [ws,t]
                    , ppCurrent  = h
                    , ppVisible  = const ""
                    , ppHidden   = const ""
@@ -544,8 +544,8 @@ myLogHook c u0 d0 u1 d1 = do
                    }
 
                 bottomPP = defaultPP
-                   { ppOutput   = \s -> hPutStrLn d0 s >> hPutStrLn d1 s
-                   , ppOrder    = \(ws:l:t:_) -> [l,ws]
+                   { ppOutput   = \ s -> hPutStrLn d0 s >> hPutStrLn d1 s
+                   , ppOrder    = \ (ws:l:t:_) -> [l,ws]
                    , ppSep      = " "
                    , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
                    , ppWsSep    = " "
