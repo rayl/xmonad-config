@@ -167,8 +167,8 @@ myModMask   =   mod4Mask
 
 myWsShortcuts = map show $ [1..9] ++ [0]
 
-myKeymaps  = [ navigationMap, shortcutMap, keyboardMap ]
-myButmaps  = [ mouseMap ] 
+myKeymaps  = [ navigationMap, shortcutMap, layoutMap, keyboardMap ]
+myButmaps  = [ mouseMap, mouseLayoutMap ] 
 
 
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
@@ -234,6 +234,24 @@ mouseMap conf = concat
     --__ = \ _ -> return ()
     k = bindButton 0
 
+mouseLayoutMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
+mouseLayoutMap conf = concat
+  --  button         M-               M-S-             M-C-             M-S-C-
+  [ k button1        __               __               __               __
+  , k button2        __               __               __               __
+  , k button3        __               __               __               __
+  , k button4        openTerminal     __               __               __
+  , k button5        __               __               __               __
+  ]
+  where
+
+    openTerminal     = d $ spawn $ terminal conf
+
+    d x  = \ w -> x
+
+    __ = \ _ -> return ()
+    k = bindButton mod1Mask
+
 navigationMap :: XConfig Layout -> [(String, X ())]
 navigationMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
@@ -296,6 +314,22 @@ navigationMap conf = concat
 
     __ = return ()
     k = bindString ""
+
+layoutMap :: XConfig Layout -> [(String, X ())]
+layoutMap conf = concat
+  --  keysym         M-               M-S-             M-C-             M-S-C-
+  [ k "j"            __               __               __               __
+  , k "k"            openTerminal     __               __               __
+  , k "l"            __               __               __               __
+  , k ","            __               __               __               __
+  , k "."            __               __               __               __
+  ]
+  where
+
+    openTerminal     = spawn $ terminal conf
+
+    __ = return ()
+    k = bindString "M1-"
 
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
