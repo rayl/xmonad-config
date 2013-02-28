@@ -232,7 +232,7 @@ mouseMap conf = concat
     d x  = \ w -> x
 
     --__ = \ _ -> return ()
-    k = bindButton
+    k = bindButton 0
 
 navigationMap :: XConfig Layout -> [(String, X ())]
 navigationMap conf = concat
@@ -295,7 +295,7 @@ navigationMap conf = concat
     dfl f d l = case l of [] -> d; w:ws -> f w
 
     __ = return ()
-    k = bindString
+    k = bindString ""
 
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
@@ -387,7 +387,7 @@ keyboardMap conf = concat
     fetchMouse       = warpToWindow 0.5 0.5
 
     __ = return ()
-    k = bindString
+    k = bindString ""
 
 shortcutMap :: XConfig l -> [(String, X ())]
 shortcutMap conf =
@@ -400,26 +400,26 @@ shortcutMap conf =
                send    = windows . W.shift
                drag    = \ w -> send w >> view w
 
-bindString :: String -> X () -> X () -> X () -> X () -> [(String, X ())]
-bindString key m ms mc msc =
-        [ bind "M-"      key m
-        , bind "M-S-"    key ms
-        , bind "M-C-"    key mc
-        , bind "M-S-C-"  key msc
+bindString :: String -> String -> X () -> X () -> X () -> X () -> [(String, X ())]
+bindString p key m ms mc msc =
+        [ bind ""      key m
+        , bind "S-"    key ms
+        , bind "C-"    key mc
+        , bind "S-C-"  key msc
         ]
            where
-               bind mod key cmd = (mod ++ key, cmd)
+               bind mod key cmd = ("M-" ++ p ++ mod ++ key, cmd)
 
-bindButton :: Button -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
+bindButton :: KeyMask -> Button -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
            -> [((KeyMask,Button), (Window -> X ()))]
-bindButton but m ms mc msc =
+bindButton p but m ms mc msc =
         [ bind m'    but m
         , bind ms'   but ms
         , bind mc'   but mc
         , bind msc'  but msc
         ]
            where
-               bind mod but cmd = ((mod,but), cmd)
+               bind mod but cmd = ((p .|. mod,but), cmd)
                m'   = myModMask
                ms'  = myModMask .|. shiftMask
                mc'  = myModMask .|.               controlMask
