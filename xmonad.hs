@@ -317,14 +317,30 @@ layoutMap :: XConfig Layout -> [(String, X ())]
 layoutMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "j"            __               __               __               __
-  , k "k"            openTerminal     __               __               __
+  , k "k"            __               __               __               __
   , k "l"            __               __               __               __
-  , k ","            __               __               __               __
-  , k "."            __               __               __               __
+  , k "z"            fullscreen       toggleStruts     __               __
+  , k ","            incMaster        __               __               __
+  , k "."            decMaster        __               __               __
+  , k "<Space>"      nextLayout       resetLayout      __               refresh'
+  , k "<Up>"         shrinkSlave      __               __               __
+  , k "<Down>"       expandSlave      __               __               __
+  , k "<Left>"       shrinkMaster     __               __               __
+  , k "<Right>"      expandMaster     __               __               __
   ]
   where
 
-    openTerminal     = spawn $ terminal conf
+    refresh'         = refresh
+    resetLayout      = setLayout $ layoutHook conf
+    nextLayout       = sendMessage NextLayout
+    fullscreen       = sendMessage (Toggle ZOOM)
+    toggleStruts     = sendMessage ToggleStruts
+    expandMaster     = sendMessage Expand
+    shrinkMaster     = sendMessage Shrink
+    expandSlave      = sendMessage ExpandSlave
+    shrinkSlave      = sendMessage ShrinkSlave
+    incMaster        = sendMessage (IncMasterN 1)
+    decMaster        = sendMessage (IncMasterN (-1))
 
     __ = return ()
     k = bindString "M1-"
@@ -364,11 +380,7 @@ keyboardMap conf = concat
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
   , k "n"            newWorkspace     nameWorkspace    nukeWorkspace    __
-  , k ","            incMaster        __               __               __
-  , k "."            decMaster        __               __               __
   , k "/"            __               __               __               __
-
-  , k "<Space>"      nextLayout       resetLayout      __               refresh'
 
   , k "<Home>"       __               __               __               __
   , k "<End>"        __               __               __               __
@@ -376,10 +388,6 @@ keyboardMap conf = concat
   , k "<Page_Up>"    __               __               __               __
   , k "<Page_Down>"  __               __               __               __
 
-  , k "<Up>"         shrinkSlave      __               __               __
-  , k "<Down>"       expandSlave      __               __               __
-  , k "<Left>"       shrinkMaster     __               __               __
-  , k "<Right>"      expandMaster     __               __               __
   ]
   where
 
@@ -399,23 +407,14 @@ keyboardMap conf = concat
 
     sink             = windows . W.sink
 
-    refresh'         = refresh
-    resetLayout      = setLayout $ layoutHook conf
-    nextLayout       = sendMessage NextLayout
-    fullscreen       = sendMessage (Toggle ZOOM)
-    toggleStruts     = sendMessage ToggleStruts
-    expandMaster     = sendMessage Expand
-    shrinkMaster     = sendMessage Shrink
-    expandSlave      = sendMessage ExpandSlave
-    shrinkSlave      = sendMessage ShrinkSlave
-    incMaster        = sendMessage (IncMasterN 1)
-    decMaster        = sendMessage (IncMasterN (-1))
-
     openTerminal     = spawn $ terminal conf
     openChrome       = spawn "google-chrome"
     openDmenu        = spawn "dmenu_run"
     searchPrompt     = promptSearch defaultXPConfig google
     searchSelection  = selectSearch google
+
+    fullscreen       = sendMessage (Toggle ZOOM)
+    toggleStruts     = sendMessage ToggleStruts
 
     __ = return ()
     k = bindString ""
