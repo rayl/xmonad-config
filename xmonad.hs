@@ -18,6 +18,7 @@ import qualified Data.List as L          (intersperse,find)
 import qualified Data.Map as M           (Map,fromList,lookup,union)
 import Data.Maybe                        (fromMaybe)
 import Data.Monoid                       (All,mconcat,mempty)
+import System.Directory                  (getCurrentDirectory)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
 import XMonad                            -- many
@@ -49,6 +50,7 @@ import XMonad.Layout.PerWorkspace        (onWorkspace)
 import XMonad.Layout.Reflect             (reflectHoriz)
 import XMonad.Layout.Renamed             (renamed,Rename(Replace,CutWordsLeft))
 import XMonad.Layout.ResizableTile       (ResizableTall(..))
+import XMonad.Layout.WorkspaceDir        (workspaceDir,changeDir)
 import XMonad.Prompt                     (defaultXPConfig,autoComplete)
 import XMonad.Prompt.Workspace           (workspacePrompt)
 import qualified XMonad.StackSet as W    -- many
@@ -111,7 +113,9 @@ myWorkspaces = ["dash","todo","news","book","song"]
 ------------------------------------------------------------------------
 -- LAYOUTS
 ------------------------------------------------------------------------
-myLayoutHook = avoidStruts
+myLayoutHook = id
+             $ avoidStruts
+             $ workspaceDir "~"
              $ smartBorders
              $ mkToggle (single ZOOM)
              $ onWorkspace "gimp" (gimpModify gimpLayouts)
@@ -378,7 +382,7 @@ keyboardMap conf = concat
 
   , k "z"            fullscreen       toggleStruts     __               __
   , k "x"            __               __               __               __
-  , k "c"            __               __               __               __
+  , k "c"            chdir            __               __               __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
   , k "n"            newWorkspace     nameWorkspace    nukeWorkspace    __
@@ -417,6 +421,8 @@ keyboardMap conf = concat
 
     fullscreen       = sendMessage (Toggle ZOOM)
     toggleStruts     = sendMessage ToggleStruts
+
+    chdir            = changeDir defaultXPConfig
 
     __ = return ()
     k = bindString ""
@@ -539,15 +545,20 @@ focusedTitleOnScreen n = do
     return (\ _ -> x)
 
 workspaceOnScreen :: ScreenId -> X (String -> String)
-workspaceOnScreen n = gets (fmt . windowset)
-   where
-      fmt s = \ _ -> txt
-         where
-            txt = if tag == foc then cur else vis
-            tag = fromMaybe "<???>" $ W.lookupWorkspace n s
-            foc = W.currentTag s
+workspaceOnScreen n = do
+   w <- gets windowset
+   d <- io getCurrentDirectory
+   let tag = fromMaybe "<???>" $ W.lookupWorkspace n w
+       foc = W.currentTag w
+       fmt1 = if tag == foc then cur else vis
+          where
             cur = xmobarColor "white" "blue" . wrap "  " "  " $ map toUpper tag
-            vis = xmobarColor "white" ""     . wrap "  " "  " $ tag
+            vis = xmobarColor "grey" ""     . wrap "  " "  " $ tag
+       fmt2 = if tag == foc then (" in " ++ cur) else ""
+          where
+            cur = xmobarColor "white" "" . wrap " " " " $ d
+            vis = xmobarColor "grey" ""     . wrap " " " " $ d
+   return $ \ _ -> fmt1 ++ fmt2
 
 myLogHook :: XConfig l -> Handle -> Handle -> Handle -> Handle -> X ()
 myLogHook c u0 d0 u1 d1 = do
