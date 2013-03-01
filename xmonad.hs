@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK prune #-}
 {- |
 Module      :  xmonad.hs
 Description :  Ray's XMonad configuration
@@ -8,9 +9,30 @@ Maintainer  :  rayl@mail.com
 Stability   :  unstable
 Portability :  non-portable
 
-This is my attempt to find a better desktop Linux experience while
-simultaneously learning Haskell.
+This XMonad configuration is optimized for:
+
+   - desktop machine
+
+   - dual 1080p monitors
+
+   - Windows keyboard
+
+   - Logitech Trackman Wheel
+
+The core workflow is expected to revolve around:
+
+   - bash
+
+   - vim 
+
+   - google-chrome
+
+   - libreoffice
+
 -}
+
+-- Uncomment to run Haddock on this file. Recomment in order to make --recompile work...
+-- module XMonadHS where
 
 import Data.Char                         (toUpper)
 import Data.Function                     (on)
@@ -61,129 +83,134 @@ import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
 
 
-myTerminal :: String
-myTerminal = "urxvt"
-
-main :: IO ()
-main = do
-    topBar0    <- spawnBar 0 T
-    bottomBar0 <- spawnBar 0 B
-    topBar1    <- spawnBar 1 T
-    bottomBar1 <- spawnBar 1 B
-    xmonad $ ewmh
-           $ withUrgencyHook NoUrgencyHook
-           $ defaultConfig
-        { borderWidth        = myBorderWidth
-        , workspaces         = myWorkspaces
-        , layoutHook         = myLayoutHook
-        , terminal           = myTerminal
-        , normalBorderColor  = myNormalBorderColor
-        , focusedBorderColor = myFocusedBorderColor
-        , modMask            = myModMask
-        , keys               = myKeys
-        , logHook            = myLogHook defaultConfig topBar0 bottomBar0
-                                                       topBar1 bottomBar1
-        , startupHook        = myStartupHook
-        , mouseBindings      = myMouseBindings
-        , manageHook         = myManageHook defaultConfig
-        , handleEventHook    = myHandleEventHook defaultConfig
-        }
-
-
 ------------------------------------------------------------------------
--- DECORATION
+-- * Workspaces
 ------------------------------------------------------------------------
-myBorderWidth :: Dimension
-myBorderWidth = 2
+-- $
+-- Core tasks like Gmail, Calendar, Reader, music, etc live on a set of /fixed workspaces/.
+-- These workspaces are defined by 'myWorkspaces'.
+-- They are directly accessible via hotkeys defined in 'myWsShortcuts'.
+-- They appear first in the workspace list on the bottom status bar, labeled with their hotkey.
+-- 
+-- All other tasks live in a variable list of dynamic workspaces.
+-- These workspaces appear after the fixed workspaces in the workspace list.
+-- They do not have direct hotkey access.
 
-myNormalBorderColor :: String
-myNormalBorderColor = "#222"
-
-myFocusedBorderColor :: String
-myFocusedBorderColor = "#ff4"
-
-
-------------------------------------------------------------------------
--- WORKSPACES
-------------------------------------------------------------------------
+-- | The list of fixed workspaces. 
 myWorkspaces :: [WorkspaceId]
 myWorkspaces = ["dash","todo","news","book","song"]
 
-
-------------------------------------------------------------------------
--- LAYOUTS
-------------------------------------------------------------------------
-myLayoutHook = id
-             $ avoidStruts
-             $ workspaceDir "~"
-             $ smartBorders
-             $ mkToggle (single ZOOM)
-             $ onWorkspace "gimp" (gimpModify gimpLayouts)
-             $ onWorkspace "term" termLayouts
-             $ mainLayouts
-  where
-
-    mainLayouts = l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
-    gimpLayouts = l_TALL ||| l_FULL
-    termLayouts = l_3COL ||| l_FULL
-
-    gimpModify x = renamed [CutWordsLeft 3]
-                 $ withIM (0.15) (Role "gimp-toolbox")
-                 $ reflectHoriz
-                 $ withIM (0.15) (Role "gimp-dock")
-                 $ x
-
-    l_3COL = name "3col" $ multiCol [1,1] 8 0.01 0.33
-    l_2COL = name "2col" $ multiCol [1,2] 8 0.01 0.50
-    l_FULL = name "full" $ Full
-    l_DRAG = name "drag" $ mouseResizableTile { draggerType = BordersDragger }
-    l_TALL = name "tall" $ ResizableTall 2 (1/118) (11/20) [1]
-
-    name x = renamed [Replace x]
-
-------------------------------------------------------------------------
--- MANAGE
-------------------------------------------------------------------------
-myManageHook :: XConfig l -> ManageHook
-myManageHook c = mempty
-                    <+> myManageHooks
-                    <+> manageDocks
-
-myManageHooks :: ManageHook
-myManageHooks = composeAll
-    [ className =? "Gimp"             --> unfloat
-    ]
-    where
-       unfloat = ask >>= doF . W.sink
-
-
-------------------------------------------------------------------------
--- EVENTS
-------------------------------------------------------------------------
-myHandleEventHook :: XConfig l -> (Event -> X All)
-myHandleEventHook c = mempty
-                         <+> fullscreenEventHook
-                         <+> docksEventHook
-                         <+> handleEventHook c
-
-
-------------------------------------------------------------------------
--- BINDINGS
-------------------------------------------------------------------------
-myModMask   =   mod4Mask
-
+-- | The hotkeys used for direct access to fixed workspaces.
+--   Also used for labeling them in the workspace list on the bottom bar.
 myWsShortcuts = map show $ [1..9] ++ [0]
+
+
+
+------------------------------------------------------------------------
+-- * Bindings
+------------------------------------------------------------------------
+
+-- | Mod-4 is the Win key available on most PC keyboards.
+myModMask = mod4Mask
+
+
+-- ** Focus control
+-- $
+-- Focus control allows navigation between windows, screens and workspaces.
+-- Full keyboard and partial trackball bindings are available.
+-- With a few trackball exceptions, control is done using just Mod plus one of several command keys.
+--
+-- The focus policy is strictly FocusFollowsMouse and MouseFollowsFocus. 
+-- It is not possible for the mouse pointer and the focused window to diverge.
+
+
+-- *** Keyboard
+-- $
+-- Window focus is set with J, K and M.
+-- Mod-J and Mod-K move the focus around the current screen.
+-- Windows are visited in stack order.
+-- Mod-M warps focus to the master window.
+-- 
+-- Screen focus is set with L.
+-- Mod-L jumps to the next screen.
+-- Navigation is forward-only, cycling at the end of the screen list.
+-- On a dual-head system, this acts as a simple back-and-forth toggle between screens.
+-- 
+-- Workspace focus is set with U and I.
+-- Mod-U and Mod-I cycle around the hidden workspaces.
+-- Hidden workspaces are visited in the order shown on the workspace list at the bottom.
+-- Visible workspaces are skipped, as they are accessible by changing screen focus.
+--
+-- Special workspace access is available with grave, Esc, and O.
+-- Mod-<grave> bounces back and forth between the last visited workspace.
+-- Mod-<Esc> jumps to a workspace with an urgent window.
+-- Mod-O prompts (with autocompletion) for a workspace name.
+-- When a unique, existing workspace prefix is detected, focus immediately jumps to that workspace.
+-- Screen focus may change if the workspace is currently visible.
+
+
+-- *** Trackball
+-- $
+-- Window focus is set with the wheel.
+-- Hold Mod- and roll the wheel back and forth to move the focus around the current screen.
+-- Windows are visited in stack order.
+-- Hold Mod-C- and click the wheel to warp focus to the master window.
+-- 
+-- Screen focus is set with the wheel.
+-- Hold Mod- and click the wheel to jump to the next screen.
+-- Navigation is forward-only, cycling at the end of the screen list.
+-- On a dual-head system, this acts as a simple back-and-forth toggle between screens.
+-- 
+-- Workspace focus is set with the wheel.
+-- Hold Mod-C- and roll the wheel back and forth to cycle around the hidden workspaces.
+-- Hidden workspaces are visited in the order shown on the workspace list at the bottom.
+-- Visible workspaces are skipped, as they are accessible by changing screen focus.
+
+
+-- ** Window motion
+-- $
+-- Windows can be dragged around by holding Shift while moving the focus.
+-- Place focus on the window to be moved, press Shift, and navigate to the desired location.
+-- The window will be dragged along as the focus moves.
+-- Any focus control (except view urgant) can be augmented with Shift.
+--
+-- Windows can also be moved by holding Control and using a focus command.
+-- In this case, the window is sent away while the focus remains on the current screen and workspace.
+-- This works for all focus control commands except J, K and Esc.
+
+-- ** Layout control
+-- *** Keyboard
+-- $
+
+-- *** Trackball
+-- $
+-- Fullscreen is toggled with Mod-button1. Status bars are toggled with Mod-button3.
+-- 
+-- The width of the master window is adjusted using Mod-S- with button1 and button3.
+-- 
+-- The number of windows in the current column is adjusted using Mod-C- with button1 and button3.
+
+-- ** Misc
+-- *** Keyboard
+-- $
+
+-- *** Trackball
+-- $
+-- Use Mod-S-C-button1 to open a new terminal above the current window.
+-- 
+-- Use Mod-S-C-button3 to kill the current window.
+
 
 myKeymaps  = [ navigationMap, shortcutMap, layoutMap, keyboardMap ]
 myButmaps  = [ mouseMap, mouseLayoutMap ] 
 
-
+-- | Binding table for trackball navigation, window motion, and some layout control
 mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
 mouseMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        zoomWindow       openTerminal     incMaster        shrinkMaster
-  , k button2        viewNextScreen   dragNextScreen   nextLayout       dragMainWindow
-  , k button3        toggleStruts     killWindow       decMaster        expandMaster
+  [ k button1        zoomWindow       shrinkMaster     incMaster        openTerminal
+  , k button2        viewNextScreen   dragNextScreen   viewMainWindow   dragMainWindow
+  , k button3        toggleStruts     expandMaster     decMaster        killWindow
   , k button4        viewPrevWindow   dragPrevWindow   viewPrevWSpace   dragPrevWSpace
   , k button5        viewNextWindow   dragNextWindow   viewNextWSpace   dragNextWSpace
   ] 
@@ -195,9 +222,8 @@ mouseMap conf = concat
     viewPrevWindow   = b $ W.focusUp
     dragPrevWindow   = b $ W.swapUp
 
+    viewMainWindow   = b $ W.focusMaster
     dragMainWindow   = b $ W.shiftMaster
-    expandMaster     = c $ Expand
-    shrinkMaster     = c $ Shrink
 
     viewNextScreen   = a $ relScreen 1 view
     dragNextScreen   = a $ relScreen 1 drag
@@ -211,7 +237,9 @@ mouseMap conf = concat
     zoomWindow       = c $ Toggle ZOOM
     toggleStruts     = c $ ToggleStruts
 
-    nextLayout       = c $ NextLayout
+    expandMaster     = c $ Expand
+    shrinkMaster     = c $ Shrink
+
     incMaster        = c $ IncMasterN 1
     decMaster        = c $ IncMasterN (-1)
 
@@ -249,13 +277,13 @@ mouseLayoutMap conf = concat
   ]
   where
 
-
     openTerminal     = a $ spawn $ terminal conf
 
     a x  = \ _ -> x
     __   = \ _ -> return ()
     k = bindButton mod1Mask
 
+-- | Binding table for keyboard navigation and window motion
 navigationMap :: XConfig Layout -> [(String, X ())]
 navigationMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
@@ -319,6 +347,7 @@ navigationMap conf = concat
     __ = return ()
     k = bindString ""
 
+-- | Binding table for keyboard layout control
 layoutMap :: XConfig Layout -> [(String, X ())]
 layoutMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
@@ -351,6 +380,7 @@ layoutMap conf = concat
     __ = return ()
     k = bindString "M1-"
 
+-- | Binding table for other keyboard commands
 keyboardMap :: XConfig Layout -> [(String, X ())]
 keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
@@ -427,6 +457,7 @@ keyboardMap conf = concat
     __ = return ()
     k = bindString ""
 
+-- | Binding table for hotkey access to stable workspaces
 shortcutMap :: XConfig l -> [(String, X ())]
 shortcutMap conf =
         [(mod ++ key, cmd $ tag)
@@ -437,6 +468,8 @@ shortcutMap conf =
                view    = windows . W.view
                send    = windows . W.shift
                drag    = \ w -> send w >> view w
+
+
 
 bindString :: String -> String -> X () -> X () -> X () -> X () -> [(String, X ())]
 bindString p key m ms mc msc =
@@ -471,7 +504,45 @@ myMouseBindings conf = M.fromList $ concat $ map ($ conf) myButmaps
 
 
 ------------------------------------------------------------------------
--- LOGGING
+-- * Layouts
+-- ** Core layouts
+-- ** Modifiers
+-- ** Per-workspace layouts
+-- ** Toggles
+-- ** Other features
+------------------------------------------------------------------------
+myLayoutHook = id
+             $ avoidStruts
+             $ workspaceDir "~"
+             $ smartBorders
+             $ mkToggle (single ZOOM)
+             $ onWorkspace "gimp" (gimpModify gimpLayouts)
+             $ onWorkspace "term" termLayouts
+             $ mainLayouts
+  where
+
+    mainLayouts = l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
+    gimpLayouts = l_TALL ||| l_FULL
+    termLayouts = l_3COL ||| l_FULL
+
+    gimpModify x = renamed [CutWordsLeft 3]
+                 $ withIM (0.15) (Role "gimp-toolbox")
+                 $ reflectHoriz
+                 $ withIM (0.15) (Role "gimp-dock")
+                 $ x
+
+    l_3COL = name "3col" $ multiCol [1,1] 8 0.01 0.33
+    l_2COL = name "2col" $ multiCol [1,2] 8 0.01 0.50
+    l_FULL = name "full" $ Full
+    l_DRAG = name "drag" $ mouseResizableTile { draggerType = BordersDragger }
+    l_TALL = name "tall" $ ResizableTall 2 (1/118) (11/20) [1]
+
+    name x = renamed [Replace x]
+
+
+------------------------------------------------------------------------
+-- * Logging
+-- In progress.
 ------------------------------------------------------------------------
 myTemplates :: Int -> Pos -> (String,String,String)
 myTemplates s p | p == T = headerTmpl
@@ -617,10 +688,72 @@ myLogHook c u0 d0 u1 d1 = do
 
 
 ------------------------------------------------------------------------
--- STARTUP
+-- * Manage hook
+-- In progress.
 ------------------------------------------------------------------------
+myManageHook :: XConfig l -> ManageHook
+myManageHook c = mempty
+                    <+> myManageHooks
+                    <+> manageDocks
+
+myManageHooks :: ManageHook
+myManageHooks = composeAll
+    [ className =? "Gimp"             --> unfloat
+    ]
+    where
+       unfloat = ask >>= doF . W.sink
+
+
+------------------------------------------------------------------------
+-- * Event hook
+-- In progress.
+------------------------------------------------------------------------
+myHandleEventHook :: XConfig l -> (Event -> X All)
+myHandleEventHook c = mempty
+                         <+> fullscreenEventHook
+                         <+> docksEventHook
+                         <+> handleEventHook c
+
+
+------------------------------------------------------------------------
+-- * Startup hook
+------------------------------------------------------------------------
+-- | Set the mouse cursor to a nice pointer.
+-- Set WM name to LG3D for better Java compatibility.
 myStartupHook :: X ()
 myStartupHook = mempty
                    <+> setDefaultCursor xC_left_ptr
                    <+> setWMName "LG3D"
+
+
+------------------------------------------------------------------------
+-- * Main
+------------------------------------------------------------------------
+-- | Spawn xmobar processes, then run XMonad using local configuration options
+--   defined in the following sections.
+main :: IO ()
+main = do
+    topBar0    <- spawnBar 0 T
+    bottomBar0 <- spawnBar 0 B
+    topBar1    <- spawnBar 1 T
+    bottomBar1 <- spawnBar 1 B
+    xmonad $ ewmh
+           $ withUrgencyHook NoUrgencyHook
+           $ defaultConfig
+        { borderWidth        = 2
+        , workspaces         = myWorkspaces
+        , layoutHook         = myLayoutHook
+        , terminal           = "urxvt"
+        , normalBorderColor  = "#222"
+        , focusedBorderColor = "#ff4"
+        , modMask            = myModMask
+        , keys               = myKeys
+        , logHook            = myLogHook defaultConfig topBar0 bottomBar0
+                                                       topBar1 bottomBar1
+        , startupHook        = myStartupHook
+        , mouseBindings      = myMouseBindings
+        , manageHook         = myManageHook defaultConfig
+        , handleEventHook    = myHandleEventHook defaultConfig
+        }
+
 
