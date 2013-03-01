@@ -209,14 +209,13 @@ mouseMap conf = concat
     incMaster        = c $ IncMasterN 1
     decMaster        = c $ IncMasterN (-1)
 
-    openTerminal     = d $ spawn $ terminal conf
-    killWindow       = d $ kill
+    openTerminal     = b $ spawn $ terminal conf
+    killWindow       = b $ kill
 
     viewNextWS       = moveTo Next HiddenWS
     viewPrevWS       = moveTo Prev HiddenWS
     sendNextWS       = shiftTo Next HiddenWS
     sendPrevWS       = shiftTo Prev HiddenWS
-    fetchMouse       = warpToWindow 0.5 0.5
 
     view             = windows . W.view
     send             = windows . W.shift
@@ -227,10 +226,9 @@ mouseMap conf = concat
                    >>= screenWorkspace
                    >>= flip whenJust f
 
-    a x  = \ _ -> windows x >> fetchMouse
-    b x  = \ _ -> x >> fetchMouse
+    a x  = \ _ -> windows x
+    b x  = \ _ -> x
     c x  = \ w -> sendMessage x
-    d x  = \ w -> x
 
     --__ = \ _ -> return ()
     k = bindButton 0
@@ -246,9 +244,9 @@ mouseLayoutMap conf = concat
   ]
   where
 
-    openTerminal     = d $ spawn $ terminal conf
+    openTerminal     = b $ spawn $ terminal conf
 
-    d x  = \ w -> x
+    b x  = \ w -> x
 
     __ = \ _ -> return ()
     k = bindButton mod1Mask
@@ -362,7 +360,7 @@ keyboardMap conf = concat
   , k "<Return>"     __               __               __               __
 
   , k "z"            fullscreen       toggleStruts     __               __
-  , k "x"            fetchMouse       __               __               __
+  , k "x"            __               __               __               __
   , k "c"            __               __               __               __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
@@ -419,7 +417,6 @@ keyboardMap conf = concat
     openDmenu        = spawn "dmenu_run"
     searchPrompt     = promptSearch defaultXPConfig google
     searchSelection  = selectSearch google
-    fetchMouse       = warpToWindow 0.5 0.5
 
     __ = return ()
     k = bindString ""
