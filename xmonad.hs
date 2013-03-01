@@ -28,6 +28,7 @@ import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,
                                           removeEmptyWorkspaceAfterExcept,
                                           renameWorkspace)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
+import XMonad.Actions.UpdatePointer      (updatePointer,PointerPosition(Relative))
 import XMonad.Actions.Warp               (warpToWindow)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
 import XMonad.Hooks.DynamicLog           -- many
@@ -559,6 +560,7 @@ myLogHook c u0 d0 u1 d1 = do
     h1 <- workspaceOnScreen 1
 
     id $  logHook c
+      <+> updatePointer (Relative 0.5 0.5)
       <+> dynamicLogWithPP (topPP u0 g0 h0)
       <+> dynamicLogWithPP (topPP u1 g1 h1)
       <+> dynamicLogWithPP bottomPP
