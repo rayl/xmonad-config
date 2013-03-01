@@ -581,12 +581,12 @@ myLogHook c u0 d0 u1 d1 = do
                    , ppLayout   = xmobarColor "black"  "#ccc"   . wrap "<" ">"
                    , ppWsSep    = " "
                    , ppSort     = mkWsSort cmp
-                   , ppCurrent  = xmobarColor "black"  "yellow" . wrap " " " " . shortcut
-                   , ppVisible  = xmobarColor "green"   "" . shortcut
+                   , ppCurrent  = xmobarColor "white"  "blue" . wrap " " " " . shortcut
+                   , ppVisible  = xmobarColor "black"  "blue" . wrap " " " " . shortcut
                    , ppHidden   = xmobarColor "white"  "" . shortcut
                    , ppHiddenNoWindows =
                                   xmobarColor "#444"   "black" . shortcut
-                   , ppUrgent   = xmobarColor "black"  "red" . wrap " " " " . shortcut
+                   , ppUrgent   = xmobarColor "black"  "yellow" . wrap " " " " . shortcut
                    }
 
                 shortcut x = case (M.lookup x labels) of
