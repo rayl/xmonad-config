@@ -17,7 +17,7 @@ import Data.Function                     (on)
 import qualified Data.List as L          (intersperse,find)
 import qualified Data.Map as M           (Map,fromList,lookup,union)
 import Data.Maybe                        (fromMaybe)
-import Data.Monoid                       (All,mconcat)
+import Data.Monoid                       (All,mconcat,mempty)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 import System.IO                         (hPutStrLn, Handle)
 import XMonad                            -- many
@@ -141,8 +141,9 @@ myLayoutHook = avoidStruts
 -- MANAGE
 ------------------------------------------------------------------------
 myManageHook :: XConfig l -> ManageHook
-myManageHook c =  myManageHooks
-              <+> manageDocks
+myManageHook c = mempty
+                    <+> myManageHooks
+                    <+> manageDocks
 
 myManageHooks :: ManageHook
 myManageHooks = composeAll
@@ -156,9 +157,10 @@ myManageHooks = composeAll
 -- EVENTS
 ------------------------------------------------------------------------
 myHandleEventHook :: XConfig l -> (Event -> X All)
-myHandleEventHook c =  handleEventHook c
-                   <+> docksEventHook
-                   <+> fullscreenEventHook
+myHandleEventHook c = mempty
+                         <+> fullscreenEventHook
+                         <+> docksEventHook
+                         <+> handleEventHook c
 
 
 ------------------------------------------------------------------------
@@ -554,11 +556,12 @@ myLogHook c u0 d0 u1 d1 = do
     h0 <- workspaceOnScreen 0
     h1 <- workspaceOnScreen 1
 
-    id $  logHook c
-      <+> updatePointer (Relative 0.5 0.5)
-      <+> dynamicLogWithPP (topPP u0 g0 h0)
-      <+> dynamicLogWithPP (topPP u1 g1 h1)
-      <+> dynamicLogWithPP bottomPP
+    mempty
+       <+> dynamicLogWithPP (topPP u0 g0 h0)
+       <+> dynamicLogWithPP (topPP u1 g1 h1)
+       <+> dynamicLogWithPP bottomPP
+       <+> updatePointer (Relative 0.5 0.5)
+       <+> logHook c
 
              where
                 topPP u g h = defaultPP
@@ -606,6 +609,7 @@ myLogHook c u0 d0 u1 d1 = do
 -- STARTUP
 ------------------------------------------------------------------------
 myStartupHook :: X ()
-myStartupHook =  setDefaultCursor xC_left_ptr
-             <+> setWMName "LG3D"
+myStartupHook = mempty
+                   <+> setDefaultCursor xC_left_ptr
+                   <+> setWMName "LG3D"
 
