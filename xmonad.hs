@@ -183,24 +183,24 @@ mouseMap conf = concat
   ] 
   where
 
-    viewNextWindow   = a $ W.focusDown
-    dragNextWindow   = a $ W.swapDown
+    viewNextWindow   = b $ W.focusDown
+    dragNextWindow   = b $ W.swapDown
 
-    viewPrevWindow   = a $ W.focusUp
-    dragPrevWindow   = a $ W.swapUp
+    viewPrevWindow   = b $ W.focusUp
+    dragPrevWindow   = b $ W.swapUp
 
-    dragMainWindow   = a $ W.shiftMaster
+    dragMainWindow   = b $ W.shiftMaster
     expandMaster     = c $ Expand
     shrinkMaster     = c $ Shrink
 
-    viewNextScreen   = b $ relScreen 1 view
-    dragNextScreen   = b $ relScreen 1 drag
+    viewNextScreen   = a $ relScreen 1 view
+    dragNextScreen   = a $ relScreen 1 drag
 
-    viewNextWSpace   = b $ viewNextWS
-    dragNextWSpace   = b $ sendNextWS >> viewNextWS
+    viewNextWSpace   = a $ viewNextWS
+    dragNextWSpace   = a $ sendNextWS >> viewNextWS
 
-    viewPrevWSpace   = b $ viewPrevWS
-    dragPrevWSpace   = b $ sendPrevWS >> viewPrevWS
+    viewPrevWSpace   = a $ viewPrevWS
+    dragPrevWSpace   = a $ sendPrevWS >> viewPrevWS
 
     zoomWindow       = c $ Toggle ZOOM
     toggleStruts     = c $ ToggleStruts
@@ -209,8 +209,8 @@ mouseMap conf = concat
     incMaster        = c $ IncMasterN 1
     decMaster        = c $ IncMasterN (-1)
 
-    openTerminal     = b $ spawn $ terminal conf
-    killWindow       = b $ kill
+    openTerminal     = a $ spawn $ terminal conf
+    killWindow       = a $ kill
 
     viewNextWS       = moveTo Next HiddenWS
     viewPrevWS       = moveTo Prev HiddenWS
@@ -226,11 +226,10 @@ mouseMap conf = concat
                    >>= screenWorkspace
                    >>= flip whenJust f
 
-    a x  = \ _ -> windows x
-    b x  = \ _ -> x
-    c x  = \ w -> sendMessage x
-
-    --__ = \ _ -> return ()
+    a x  = \ _ -> x
+    b x  = \ _ -> windows x
+    c x  = \ _ -> sendMessage x
+ -- __   = \ _ -> return ()
     k = bindButton 0
 
 mouseLayoutMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
@@ -244,11 +243,11 @@ mouseLayoutMap conf = concat
   ]
   where
 
-    openTerminal     = b $ spawn $ terminal conf
 
-    b x  = \ w -> x
+    openTerminal     = a $ spawn $ terminal conf
 
-    __ = \ _ -> return ()
+    a x  = \ _ -> x
+    __   = \ _ -> return ()
     k = bindButton mod1Mask
 
 navigationMap :: XConfig Layout -> [(String, X ())]
