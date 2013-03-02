@@ -34,34 +34,44 @@ The core workflow is expected to revolve around:
 -- Uncomment to run Haddock on this file. Recomment in order to make --recompile work...
 -- module XMonadHS where
 
+------------------------------------------------------------------------
+import XMonad
+import qualified XMonad.StackSet as W    -- many
+
+------------------------------------------------------------------------
 import Data.Char                         (toUpper)
 import Data.Function                     (on)
 import qualified Data.List as L          (intersperse,find)
 import qualified Data.Map as M           (Map,fromList,lookup,union)
 import Data.Maybe                        (fromMaybe)
 import Data.Monoid                       (All,mconcat,mempty)
+import Graphics.X11                      -- keysyms,etc
 import System.Directory                  (getCurrentDirectory)
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
-import System.IO                         (hPutStrLn, Handle)
-import XMonad                            -- many
-import XMonad.Actions.CycleWS            (moveTo,
-                                          WSType(HiddenWS),Direction1D(..),
-                                          shiftTo, screenBy)
-import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,
-                                          removeEmptyWorkspaceAfterExcept,
-                                          renameWorkspace)
+import System.IO                         (hPutStrLn,Handle)
+
+------------------------------------------------------------------------
+import XMonad.Actions.CycleWS            (moveTo,WSType(HiddenWS),
+                                          Direction1D(..),shiftTo,screenBy)
+import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,renameWorkspace,
+                                          removeEmptyWorkspaceAfterExcept)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
 import XMonad.Actions.UpdatePointer      (updatePointer,PointerPosition(Relative))
 import XMonad.Actions.Warp               (warpToWindow)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
+
+------------------------------------------------------------------------
 import XMonad.Hooks.DynamicLog           -- many
 import XMonad.Hooks.EwmhDesktops         (ewmh,fullscreenEventHook)
 import XMonad.Hooks.ManageDocks          (manageDocks,docksEventHook,
                                           avoidStruts,ToggleStruts(..))
 import XMonad.Hooks.SetWMName            (setWMName)
-import XMonad.Hooks.UrgencyHook          (withUrgencyHook, NoUrgencyHook(..),focusUrgent)
+import XMonad.Hooks.UrgencyHook          (withUrgencyHook,NoUrgencyHook(..),
+                                          focusUrgent)
+
+------------------------------------------------------------------------
 import XMonad.Layout.IM                  (withIM,Property(Role))
-import XMonad.Layout.MouseResizableTile  (mouseResizableTile, draggerType,
+import XMonad.Layout.MouseResizableTile  (mouseResizableTile,draggerType,
                                           DraggerType(BordersDragger),
                                           MRTMessage(ExpandSlave,ShrinkSlave))
 import XMonad.Layout.MultiColumns        (multiCol)
@@ -73,9 +83,12 @@ import XMonad.Layout.Reflect             (reflectHoriz)
 import XMonad.Layout.Renamed             (renamed,Rename(Replace,CutWordsLeft))
 import XMonad.Layout.ResizableTile       (ResizableTall(..))
 import XMonad.Layout.WorkspaceDir        (workspaceDir,changeDir)
+
+------------------------------------------------------------------------
 import XMonad.Prompt                     (defaultXPConfig,autoComplete)
 import XMonad.Prompt.Workspace           (workspacePrompt)
-import qualified XMonad.StackSet as W    -- many
+
+------------------------------------------------------------------------
 import XMonad.Util.Cursor                (setDefaultCursor)
 import XMonad.Util.EZConfig              (mkKeymap)
 import XMonad.Util.NamedWindows          (getName)
