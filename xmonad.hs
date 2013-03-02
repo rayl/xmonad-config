@@ -383,17 +383,27 @@ layoutMap conf = concat
 mouseLayoutMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
 mouseLayoutMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        __               __               __               __
+  [ k button1        fullscreen       __               __               __
   , k button2        __               __               __               __
-  , k button3        __               __               __               __
-  , k button4        openTerminal     __               __               __
-  , k button5        __               __               __               __
+  , k button3        toggleStruts     __               __               __
+  , k button4        incMaster        expandMaster     expandSlave      __
+  , k button5        decMaster        shrinkMaster     shrinkSlave      __
   ]
   where
 
-    openTerminal     = a $ spawn $ terminal conf
+    nextLayout       = c $ NextLayout
+    fullscreen       = c $ (Toggle ZOOM)
+    toggleStruts     = c $ ToggleStruts
+    expandMaster     = c $ Expand
+    shrinkMaster     = c $ Shrink
+    expandSlave      = c $ ExpandSlave
+    shrinkSlave      = c $ ShrinkSlave
+    incMaster        = c $ (IncMasterN 1)
+    decMaster        = c $ (IncMasterN (-1))
 
     a x  = \ _ -> x
+    b x  = \ _ -> windows x
+    c x  = \ _ -> sendMessage x
     __   = \ _ -> return ()
     k = bindButton mod1Mask
 
