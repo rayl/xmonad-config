@@ -145,13 +145,11 @@ myLayoutHook = id
              $ smartBorders
              $ mkToggle (single ZOOM)
              $ onWorkspace "gimp" (gimpModify gimpLayouts)
-             $ onWorkspace "term" termLayouts
              $ mainLayouts
   where
 
-    mainLayouts = l_3COL ||| l_2COL ||| l_FULL ||| l_DRAG
-    gimpLayouts = l_TALL ||| l_FULL
-    termLayouts = l_3COL ||| l_FULL
+    mainLayouts = l_3COL ||| l_2COL ||| l_DRAG
+    gimpLayouts = l_TALL
 
     gimpModify x = renamed [CutWordsLeft 3]
                  $ withIM (0.15) (Role "gimp-toolbox")
@@ -161,13 +159,12 @@ myLayoutHook = id
 
     l_3COL = name "3col" $ multiCol [1,1] 8 0.01 0.33
     l_2COL = name "2col" $ multiCol [1,2] 8 0.01 0.50
-    l_FULL = name "full" $ Full
     l_DRAG = name "drag" $ mouseResizableTile { draggerType = BordersDragger }
     l_TALL = name "tall" $ ResizableTall 2 (1/118) (11/20) [1]
 
     name x = renamed [Replace x]
 
-myLayouts = ["3col","2col","full","drag","tall"]
+myLayouts = ["3col","2col","drag","tall"]
 
 data Lay = Lay String
 
