@@ -1,35 +1,36 @@
-{-# OPTIONS_HADDOCK prune #-}
-{- |
-Module      :  xmonad.hs
-Description :  Ray's XMonad configuration
-Copyright   :  (c) 2013 Ray Lehtiniemi
-License     :  BSD3-style (see LICENSE)
+{-# OPTIONS_HADDOCK ignore-exports #-}
 
-Maintainer  :  rayl@mail.com
-Stability   :  unstable
-Portability :  non-portable
-
-This XMonad configuration is optimized for:
-
-   - desktop machine
-
-   - dual 1080p monitors
-
-   - Windows keyboard
-
-   - Logitech Trackman Wheel
-
-The core workflow is expected to revolve around:
-
-   - bash
-
-   - vim 
-
-   - google-chrome
-
-   - libreoffice
-
--}
+-----------------------------------------------------------------------------
+-- |
+-- Module       : xmonad.hs
+-- Description  :  Ray's XMonad configuration
+-- Copyright    : (c) 2013 Ray Lehtiniemi
+-- License      : BSD3-style (see LICENSE)
+--
+-- Maintainer   : Ray Lehtiniemi <rayl@mail.com>
+-- Stability    : unstable
+-- Portability  : unportable
+--
+-- My XMonad configuration is optimized for:
+-- 
+--    - desktop machine
+-- 
+--    - dual 1080p monitors
+-- 
+--    - Windows keyboard
+-- 
+--    - Logitech Trackman Wheel
+-- 
+-- My core workflows revolve around:
+-- 
+--    - bash
+-- 
+--    - vim 
+-- 
+--    - google-chrome
+-- 
+--    - libreoffice
+-----------------------------------------------------------------------------
 
 module Main (main) where
 
@@ -48,6 +49,8 @@ import System.IO                         (hPutStrLn,Handle)
 
 import XMonad.Actions.UpdatePointer      (updatePointer,PointerPosition(Relative))
 
+import XMonad.Config.Rayl.Layout         (MyTransformers(ZOOM))
+
 import XMonad.Hooks.DynamicLog           -- many
 import XMonad.Hooks.EwmhDesktops         (ewmh,fullscreenEventHook)
 import XMonad.Hooks.ManageDocks          (manageDocks,docksEventHook, avoidStruts)
@@ -60,7 +63,6 @@ import XMonad.Layout.MouseResizableTile  (mouseResizableTile,draggerType,
                                           DraggerType(BordersDragger))
 import XMonad.Layout.MultiColumns        (multiCol)
 import XMonad.Layout.MultiToggle         (mkToggle,single)
-import XMonad.Layout.MyTransformers      (MyTransformers(ZOOM))
 import XMonad.Layout.NoBorders           (smartBorders)
 import XMonad.Layout.PerWorkspace        (onWorkspace)
 import XMonad.Layout.Reflect             (reflectHoriz)

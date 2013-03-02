@@ -1,12 +1,24 @@
 {-# OPTIONS_HADDOCK ignore-exports #-}
 
-module XMonad.Config.Rayl.Keymaps
-  ( navigationMap
-  , mouseMap
-  , layoutMap
-  , mouseLayoutMap
-  , keyboardMap
-  ) where
+-----------------------------------------------------------------------------
+-- |
+-- Module       : XMonad.Config.Rayl.Keymaps
+-- Copyright    : (c) 2013 Ray Lehtiniemi
+-- License      : BSD3-style (see LICENSE)
+--
+-- Maintainer   : Ray Lehtiniemi <rayl@mail.com>
+-- Stability    : unstable
+-- Portability  : unportable
+--
+-- This module provides tables implementing my preferred keybindings.
+-----------------------------------------------------------------------------
+module XMonad.Config.Rayl.Keymaps (
+    navigationMap,
+    mouseMap,
+    layoutMap,
+    mouseLayoutMap,
+    keyboardMap
+    ) where
 
 
 import XMonad                            hiding ((|||))
@@ -22,13 +34,14 @@ import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,renameWorkspace,
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
 
+import XMonad.Config.Rayl.Layout         (MyTransformers(ZOOM))
+
 import XMonad.Hooks.ManageDocks          (ToggleStruts(..))
 import XMonad.Hooks.UrgencyHook          (focusUrgent)
 
 import XMonad.Layout.LayoutCombinators   ((|||),JumpToLayout(..))
 import XMonad.Layout.MouseResizableTile  (MRTMessage(ExpandSlave,ShrinkSlave))
 import XMonad.Layout.MultiToggle         (Toggle(..))
-import XMonad.Layout.MyTransformers      (MyTransformers(ZOOM))
 import XMonad.Layout.WorkspaceDir        (changeDir)
 
 import XMonad.Prompt                     (defaultXPConfig,autoComplete)
