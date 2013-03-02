@@ -143,6 +143,7 @@ navigationMap conf = concat
   , k "m"            viewMainWindow   dragMainWindow   __               __
   ]
   where
+    k = bindString ""
 
     viewNextWindow   = windows W.focusDown
     dragNextWindow   = windows W.swapDown
@@ -175,22 +176,7 @@ navigationMap conf = concat
 
     viewUrgnWSpace   = focusUrgent
 
-    view             = windows . W.view
-    send             = windows . W.shift
-    drag             = \ w -> send w >> view w
-
-    withLastWS f     = gets ((dfl W.tag "") . W.hidden . windowset) >>= f
-    withSomeWS       = workspacePrompt acXPConfig
-
-    relScreen n f    = return n
-                   >>= screenBy
-                   >>= screenWorkspace
-                   >>= flip whenJust f
-
-    dfl f d l = case l of [] -> d; w:ws -> f w
-
     __ = return ()
-    k = bindString ""
 
 -- | Binding table for trackball navigation, window motion, and some layout control
 mouseMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
@@ -203,6 +189,7 @@ mouseMap conf = concat
   , k button5        viewNextWindow   dragNextWindow   viewNextWSpace   dragNextWSpace
   ] 
   where
+    k = bindButton (modMask conf)
 
     viewNextWindow   = b $ W.focusDown
     dragNextWindow   = b $ W.swapDown
@@ -239,20 +226,7 @@ mouseMap conf = concat
     sendNextWS       = shiftTo Next HiddenWS
     sendPrevWS       = shiftTo Prev HiddenWS
 
-    view             = windows . W.view
-    send             = windows . W.shift
-    drag             = \ w -> send w >> view w
-
-    relScreen n f    = return n
-                   >>= screenBy
-                   >>= screenWorkspace
-                   >>= flip whenJust f
-
-    a x  = \ _ -> x
-    b x  = \ _ -> windows x
-    c x  = \ _ -> sendMessage x
  -- __   = \ _ -> return ()
-    k = bindButton (modMask conf)
 
 -- | Binding table for keyboard layout control
 layoutMap :: XConfig Layout -> [(String, X ())]
@@ -272,6 +246,7 @@ layoutMap conf = concat
   , k "<Return>"     selectLayout     __               __               __
   ]
   where
+    k = bindString "M1-"
 
     refresh'         = refresh
     resetLayout      = setLayout $ layoutHook conf
@@ -287,7 +262,6 @@ layoutMap conf = concat
     selectLayout     = __ -- layoutPrompt acXPConfig (\ l -> sendMessage $ JumpToLayout l)
 
     __ = return ()
-    k = bindString "M1-"
 
 mouseLayoutMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
 mouseLayoutMap conf = concat
@@ -299,6 +273,7 @@ mouseLayoutMap conf = concat
   , k button5        decMaster        shrinkMaster     shrinkSlave      __
   ]
   where
+    k = bindButton ((modMask conf) .|. mod1Mask)
 
     resetLayout      = a $ setLayout $ layoutHook conf
     nextLayout       = c $ NextLayout
@@ -311,11 +286,7 @@ mouseLayoutMap conf = concat
     incMaster        = c $ (IncMasterN 1)
     decMaster        = c $ (IncMasterN (-1))
 
-    a x  = \ _ -> x
-    b x  = \ _ -> windows x
-    c x  = \ _ -> sendMessage x
     __   = \ _ -> return ()
-    k = bindButton ((modMask conf) .|. mod1Mask)
 
 -- | Binding table for other keyboard commands
 keyboardMap :: XConfig Layout -> [(String, X ())]
@@ -363,6 +334,7 @@ keyboardMap conf = concat
 
   ]
   where
+    k = bindString ""
 
     restartXmonad    = restart "xmonad" True
     resetXmonad      = restart "xmonad" False
@@ -392,7 +364,33 @@ keyboardMap conf = concat
     chdir            = changeDir defaultXPConfig
 
     __ = return ()
-    k = bindString ""
+
+
+
+
+
+
+
+
+
+
 
 acXPConfig = defaultXPConfig { autoComplete = Just 1 }
 
+withLastWS f = gets ((dfl W.tag "") . W.hidden . windowset) >>= f
+withSomeWS   = workspacePrompt acXPConfig
+
+dfl f d l = case l of [] -> d; w:ws -> f w
+
+relScreen n f = return n
+            >>= screenBy
+            >>= screenWorkspace
+            >>= flip whenJust f
+
+view = windows . W.view
+send = windows . W.shift
+drag = \ w -> send w >> view w
+
+a x  = \ _ -> x
+b x  = \ _ -> windows x
+c x  = \ _ -> sendMessage x
