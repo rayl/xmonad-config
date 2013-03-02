@@ -72,12 +72,12 @@ import XMonad.Layout.WorkspaceDir        (workspaceDir)
 import XMonad.Prompt                     (XPConfig(..),XPrompt(..),mkXPrompt,mkComplFunFromList')
 
 import XMonad.Util.Cursor                (setDefaultCursor)
-import XMonad.Util.Keytable              (mkMyKeys,mkMyMouseBindings)
+import XMonad.Util.Keymap                (mkMyKeys,mkMyMouseBindings)
 import XMonad.Util.NamedWindows          (getName)
 import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
 
-import Bindings                          (navigationMap,mouseMap,layoutMap,
+import XMonad.Config.Rayl.Keymaps        (navigationMap,mouseMap,layoutMap,
                                           mouseLayoutMap,keyboardMap)
 
 

@@ -1,5 +1,5 @@
 
-module XMonad.Util.Keytable
+module XMonad.Util.Keymap
   (
     mkMyKeys,
     mkMyMouseBindings,

@@ -1,6 +1,6 @@
 {-# OPTIONS_HADDOCK ignore-exports #-}
 
-module Bindings
+module XMonad.Config.Rayl.Keymaps
   ( navigationMap
   , mouseMap
   , layoutMap
@@ -34,7 +34,7 @@ import XMonad.Layout.WorkspaceDir        (changeDir)
 import XMonad.Prompt                     (defaultXPConfig,autoComplete)
 import XMonad.Prompt.Workspace           (workspacePrompt)
 
-import XMonad.Util.Keytable              (bindString,bindButton)
+import XMonad.Util.Keymap                (bindString,bindButton)
 
 
 -- * Focus control
