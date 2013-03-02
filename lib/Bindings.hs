@@ -1,4 +1,4 @@
-{-# OPTIONS_HADDOCK prune,ignore-exports #-}
+{-# OPTIONS_HADDOCK ignore-exports #-}
 
 module Bindings
   ( navigationMap
@@ -47,78 +47,63 @@ import XMonad.Util.Keytable              (bindString,bindButton)
 -- It is not possible for the mouse pointer and the focused window to diverge.
 
 
--- ** Keyboard
+-- ** Window
 -- $
--- Window focus is set with J, K and M.
+-- On the keyboard, window focus is set with J, K and M.
 -- Mod-J and Mod-K move the focus around the current screen.
 -- Windows are visited in stack order.
 -- Mod-M warps focus to the master window.
--- 
--- Screen focus is set with L.
+--
+-- On the trackball, window focus is set with the wheel.
+-- Hold Mod- and roll the wheel back and forth to move the focus around the current screen.
+-- Windows are visited in stack order.
+-- Hold Mod-C- and click the wheel to warp focus to the master window.
+
+viewNextWindow   = windows W.focusDown
+viewPrevWindow   = windows W.focusUp
+viewMainWindow   = windows W.focusMaster
+
+
+
+-- ** Screen
+-- $
+-- On the keyboard, screen focus is set with L.
 -- Mod-L jumps to the next screen.
 -- Navigation is forward-only, cycling at the end of the screen list.
 -- On a dual-head system, this acts as a simple back-and-forth toggle between screens.
 -- 
--- Workspace focus is set with U and I.
+-- On the trackball, screen focus is set with the wheel.
+-- Hold Mod- and click the wheel to jump to the next screen.
+
+viewNextScreen   = relScreen 1 view
+
+
+
+-- ** Workspace
+-- $
+-- On the keyboard, workspace focus is set with U and I.
 -- Mod-U and Mod-I cycle around the hidden workspaces.
 -- Hidden workspaces are visited in the order shown on the workspace list at the bottom.
 -- Visible workspaces are skipped, as they are accessible by changing screen focus.
 --
--- Special workspace access is available with grave, Esc, and O.
+-- On the trackball, workspace focus is set with the wheel.
+-- Hold Mod-C- and roll the wheel back and forth to cycle around the hidden workspaces.
+
+viewNextWSpace   = moveTo Next HiddenWS
+viewPrevWSpace   = moveTo Prev HiddenWS
+
+-- $
+-- Special workspace access is available on the keyboard using grave, Esc, and O.
 -- Mod-<grave> bounces back and forth between the last visited workspace.
 -- Mod-<Esc> jumps to a workspace with an urgent window.
 -- Mod-O prompts (with autocompletion) for a workspace name.
 -- When a unique, existing workspace prefix is detected, focus immediately jumps to that workspace.
 -- Screen focus may change if the workspace is currently visible.
 
-
--- ** Trackball
--- $
--- Window focus is set with the wheel.
--- Hold Mod- and roll the wheel back and forth to move the focus around the current screen.
--- Windows are visited in stack order.
--- Hold Mod-C- and click the wheel to warp focus to the master window.
--- 
--- Screen focus is set with the wheel.
--- Hold Mod- and click the wheel to jump to the next screen.
--- Navigation is forward-only, cycling at the end of the screen list.
--- On a dual-head system, this acts as a simple back-and-forth toggle between screens.
--- 
--- Workspace focus is set with the wheel.
--- Hold Mod-C- and roll the wheel back and forth to cycle around the hidden workspaces.
--- Hidden workspaces are visited in the order shown on the workspace list at the bottom.
--- Visible workspaces are skipped, as they are accessible by changing screen focus.
-
-viewNextWindow   = windows W.focusDown
-dragNextWindow   = windows W.swapDown
-
-viewPrevWindow   = windows W.focusUp
-dragPrevWindow   = windows W.swapUp
-
-viewMainWindow   = windows W.focusMaster
-dragMainWindow   = windows W.shiftMaster
-
-viewNextScreen   = relScreen 1 view
-dragNextScreen   = sendNextScreen >> viewNextScreen
-sendNextScreen   = relScreen 1 send
-
-viewNextWSpace   = moveTo Next HiddenWS
-dragNextWSpace   = sendNextWSpace >> viewNextWSpace
-sendNextWSpace   = shiftTo Next HiddenWS
-
-viewPrevWSpace   = moveTo Prev HiddenWS
-dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
-sendPrevWSpace   = shiftTo Prev HiddenWS
-
-viewSomeWSpace   = withSomeWS view
-dragSomeWSpace   = withSomeWS drag
-sendSomeWSpace   = withSomeWS send
-
 viewLastWSpace   = withLastWS view
-dragLastWSpace   = withLastWS drag
-sendLastWSpace   = withLastWS send
-
 viewUrgnWSpace   = focusUrgent
+viewSomeWSpace   = withSomeWS view
+
 
 
 -- * Window motion
@@ -129,6 +114,17 @@ viewUrgnWSpace   = focusUrgent
 -- The window will be dragged along as the focus moves.
 -- Any focus control (except view urgent) can be augmented with Shift to drag the focused window.
 
+dragNextWindow   = windows W.swapDown
+dragPrevWindow   = windows W.swapUp
+dragMainWindow   = windows W.shiftMaster
+dragNextScreen   = sendNextScreen >> viewNextScreen
+dragNextWSpace   = sendNextWSpace >> viewNextWSpace
+dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
+dragLastWSpace   = withLastWS drag
+dragSomeWSpace   = withSomeWS drag
+
+
+
 -- ** Sending
 -- $
 -- Windows can also be moved by holding Control and using many keyboard focus commands.
@@ -136,27 +132,35 @@ viewUrgnWSpace   = focusUrgent
 -- Any keyboard focus control (except J, K, and Esc) can be augmented with Control.
 -- Window sending commands are not mapped to the trackball.
 
--- * Layout control
--- ** Keyboard
--- $
+sendNextScreen   = relScreen 1 send
+sendNextWSpace   = shiftTo Next HiddenWS
+sendPrevWSpace   = shiftTo Prev HiddenWS
+sendSomeWSpace   = withSomeWS send
+sendLastWSpace   = withLastWS send
 
--- ** Trackball
+
+
+-- * Layout control
 -- $
 -- Toggle fullscreen with Mod-button1. Toggle status bars with Mod-button3.
--- 
--- Adjust width of the master window using Mod-S- with button1 and button3.
--- 
--- Adjust number of windows in the current column using Mod-C- with button1 and button3.
-nextLayout       = sendMessage $ NextLayout
 fullscreen       = sendMessage $ Toggle ZOOM
 toggleStruts     = sendMessage $ ToggleStruts
+
+-- $
+-- Adjust width of the master window using Mod-S- with button1 and button3.
 expandMaster     = sendMessage $ Expand
 shrinkMaster     = sendMessage $ Shrink
-expandSlave      = sendMessage $ ExpandSlave
-shrinkSlave      = sendMessage $ ShrinkSlave
+
+-- $
+-- Adjust number of windows in the current column using Mod-C- with button1 and button3.
 incMaster        = sendMessage $ IncMasterN 1
 decMaster        = sendMessage $ IncMasterN (-1)
 
+-- $
+-- Other layout stuff...
+expandSlave      = sendMessage $ ExpandSlave
+shrinkSlave      = sendMessage $ ShrinkSlave
+nextLayout       = sendMessage $ NextLayout
 
 -- * Misc
 -- ** Keyboard
