@@ -217,11 +217,11 @@ shortcutMap conf =
 
 -- | Compile all keyboard maps into a keys hook
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf = mkMyKeys conf [ navigationMap, shortcutMap, layoutMap, keyboardMap ]
+myKeys = mkMyKeys [ navigationMap, shortcutMap, layoutMap, keyboardMap ]
 
 -- | Compile all mouse maps into a mouseBindings hook
 myMouseBindings :: XConfig Layout -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings conf = mkMyMouseBindings conf [ mouseMap, mouseLayoutMap ] 
+myMouseBindings = mkMyMouseBindings [ mouseMap, mouseLayoutMap ] 
 
 
 ------------------------------------------------------------------------

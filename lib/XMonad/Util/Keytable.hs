@@ -11,15 +11,15 @@ import XMonad;
 import qualified Data.Map as M (Map,fromList)
 import XMonad.Util.EZConfig (mkKeymap)
 
-mkMyKeys :: XConfig Layout
-         -> [XConfig Layout -> [(String, X ())]]
+mkMyKeys :: [XConfig Layout -> [(String, X ())]]
+         -> XConfig Layout
          -> M.Map (KeyMask, KeySym) (X ())
-mkMyKeys conf maps = mkKeymap conf $ concat $ map ($ conf) maps
+mkMyKeys maps conf = mkKeymap conf $ concat $ map ($ conf) maps
 
-mkMyMouseBindings :: XConfig Layout
-                  -> [XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]]
+mkMyMouseBindings :: [XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]]
+                  -> XConfig Layout
                   -> M.Map (KeyMask, Button) (Window -> X ())
-mkMyMouseBindings conf maps = M.fromList $ concat $ map ($ conf) maps
+mkMyMouseBindings maps conf = M.fromList $ concat $ map ($ conf) maps
 
 bindString :: String -> String
            -> X () -> X () -> X () -> X ()
