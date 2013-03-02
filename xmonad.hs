@@ -168,15 +168,19 @@ myModMask = mod4Mask
 
 
 -- ** Window motion
+-- *** Dragging
 -- $
 -- Windows can be dragged around by holding Shift while moving the focus.
 -- Place focus on the window to be moved, press Shift, and navigate to the desired location.
 -- The window will be dragged along as the focus moves.
--- Any focus control (except view urgant) can be augmented with Shift.
---
--- Windows can also be moved by holding Control and using a focus command.
--- In this case, the window is sent away while the focus remains on the current screen and workspace.
--- This works for all focus control commands except J, K and Esc.
+-- Any focus control (except view urgent) can be augmented with Shift to drag the focused window.
+
+-- *** Sending
+-- $
+-- Windows can also be moved by holding Control and using many keyboard focus commands.
+-- In this case, the window is sent away while the focus remains stationary.
+-- Any keyboard focus control (except J, K, and Esc) can be augmented with Control.
+-- Window sending commands are not mapped to the trackball.
 
 -- ** Layout control
 -- *** Keyboard
@@ -184,11 +188,11 @@ myModMask = mod4Mask
 
 -- *** Trackball
 -- $
--- Fullscreen is toggled with Mod-button1. Status bars are toggled with Mod-button3.
+-- Toggle fullscreen with Mod-button1. Toggle status bars with Mod-button3.
 -- 
--- The width of the master window is adjusted using Mod-S- with button1 and button3.
+-- Adjust width of the master window using Mod-S- with button1 and button3.
 -- 
--- The number of windows in the current column is adjusted using Mod-C- with button1 and button3.
+-- Adjust number of windows in the current column using Mod-C- with button1 and button3.
 
 -- ** Misc
 -- *** Keyboard
@@ -199,89 +203,6 @@ myModMask = mod4Mask
 -- Use Mod-S-C-button1 to open a new terminal above the current window.
 -- 
 -- Use Mod-S-C-button3 to kill the current window.
-
-
-myKeymaps  = [ navigationMap, shortcutMap, layoutMap, keyboardMap ]
-myButmaps  = [ mouseMap, mouseLayoutMap ] 
-
--- | Binding table for trackball navigation, window motion, and some layout control
-mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
-mouseMap conf = concat
-  --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        zoomWindow       shrinkMaster     incMaster        openTerminal
-  , k button2        viewNextScreen   dragNextScreen   viewMainWindow   dragMainWindow
-  , k button3        toggleStruts     expandMaster     decMaster        killWindow
-  , k button4        viewPrevWindow   dragPrevWindow   viewPrevWSpace   dragPrevWSpace
-  , k button5        viewNextWindow   dragNextWindow   viewNextWSpace   dragNextWSpace
-  ] 
-  where
-
-    viewNextWindow   = b $ W.focusDown
-    dragNextWindow   = b $ W.swapDown
-
-    viewPrevWindow   = b $ W.focusUp
-    dragPrevWindow   = b $ W.swapUp
-
-    viewMainWindow   = b $ W.focusMaster
-    dragMainWindow   = b $ W.shiftMaster
-
-    viewNextScreen   = a $ relScreen 1 view
-    dragNextScreen   = a $ relScreen 1 drag
-
-    viewNextWSpace   = a $ viewNextWS
-    dragNextWSpace   = a $ sendNextWS >> viewNextWS
-
-    viewPrevWSpace   = a $ viewPrevWS
-    dragPrevWSpace   = a $ sendPrevWS >> viewPrevWS
-
-    zoomWindow       = c $ Toggle ZOOM
-    toggleStruts     = c $ ToggleStruts
-
-    expandMaster     = c $ Expand
-    shrinkMaster     = c $ Shrink
-
-    incMaster        = c $ IncMasterN 1
-    decMaster        = c $ IncMasterN (-1)
-
-    openTerminal     = a $ spawn $ terminal conf
-    killWindow       = a $ kill
-
-    viewNextWS       = moveTo Next HiddenWS
-    viewPrevWS       = moveTo Prev HiddenWS
-    sendNextWS       = shiftTo Next HiddenWS
-    sendPrevWS       = shiftTo Prev HiddenWS
-
-    view             = windows . W.view
-    send             = windows . W.shift
-    drag             = \ w -> send w >> view w
-
-    relScreen n f    = return n
-                   >>= screenBy
-                   >>= screenWorkspace
-                   >>= flip whenJust f
-
-    a x  = \ _ -> x
-    b x  = \ _ -> windows x
-    c x  = \ _ -> sendMessage x
- -- __   = \ _ -> return ()
-    k = bindButton 0
-
-mouseLayoutMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
-mouseLayoutMap conf = concat
-  --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        __               __               __               __
-  , k button2        __               __               __               __
-  , k button3        __               __               __               __
-  , k button4        openTerminal     __               __               __
-  , k button5        __               __               __               __
-  ]
-  where
-
-    openTerminal     = a $ spawn $ terminal conf
-
-    a x  = \ _ -> x
-    __   = \ _ -> return ()
-    k = bindButton mod1Mask
 
 -- | Binding table for keyboard navigation and window motion
 navigationMap :: XConfig Layout -> [(String, X ())]
@@ -347,6 +268,68 @@ navigationMap conf = concat
     __ = return ()
     k = bindString ""
 
+-- | Binding table for trackball navigation, window motion, and some layout control
+mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
+mouseMap conf = concat
+  --  button         M-               M-S-             M-C-             M-S-C-
+  [ k button1        zoomWindow       shrinkMaster     incMaster        openTerminal
+  , k button2        viewNextScreen   dragNextScreen   viewMainWindow   dragMainWindow
+  , k button3        toggleStruts     expandMaster     decMaster        killWindow
+  , k button4        viewPrevWindow   dragPrevWindow   viewPrevWSpace   dragPrevWSpace
+  , k button5        viewNextWindow   dragNextWindow   viewNextWSpace   dragNextWSpace
+  ] 
+  where
+
+    viewNextWindow   = b $ W.focusDown
+    dragNextWindow   = b $ W.swapDown
+
+    viewPrevWindow   = b $ W.focusUp
+    dragPrevWindow   = b $ W.swapUp
+
+    viewMainWindow   = b $ W.focusMaster
+    dragMainWindow   = b $ W.shiftMaster
+
+    viewNextScreen   = a $ relScreen 1 view
+    dragNextScreen   = a $ relScreen 1 drag
+
+    viewNextWSpace   = a $ viewNextWS
+    dragNextWSpace   = a $ sendNextWS >> viewNextWS
+
+    viewPrevWSpace   = a $ viewPrevWS
+    dragPrevWSpace   = a $ sendPrevWS >> viewPrevWS
+
+    zoomWindow       = c $ Toggle ZOOM
+    toggleStruts     = c $ ToggleStruts
+
+    expandMaster     = c $ Expand
+    shrinkMaster     = c $ Shrink
+
+    incMaster        = c $ IncMasterN 1
+    decMaster        = c $ IncMasterN (-1)
+
+    openTerminal     = a $ spawn $ terminal conf
+    killWindow       = a $ kill
+
+    viewNextWS       = moveTo Next HiddenWS
+    viewPrevWS       = moveTo Prev HiddenWS
+    sendNextWS       = shiftTo Next HiddenWS
+    sendPrevWS       = shiftTo Prev HiddenWS
+
+    view             = windows . W.view
+    send             = windows . W.shift
+    drag             = \ w -> send w >> view w
+
+    relScreen n f    = return n
+                   >>= screenBy
+                   >>= screenWorkspace
+                   >>= flip whenJust f
+
+    a x  = \ _ -> x
+    b x  = \ _ -> windows x
+    c x  = \ _ -> sendMessage x
+ -- __   = \ _ -> return ()
+    k = bindButton 0
+
 -- | Binding table for keyboard layout control
 layoutMap :: XConfig Layout -> [(String, X ())]
 layoutMap conf = concat
@@ -379,6 +362,23 @@ layoutMap conf = concat
 
     __ = return ()
     k = bindString "M1-"
+
+mouseLayoutMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
+mouseLayoutMap conf = concat
+  --  button         M-               M-S-             M-C-             M-S-C-
+  [ k button1        __               __               __               __
+  , k button2        __               __               __               __
+  , k button3        __               __               __               __
+  , k button4        openTerminal     __               __               __
+  , k button5        __               __               __               __
+  ]
+  where
+
+    openTerminal     = a $ spawn $ terminal conf
+
+    a x  = \ _ -> x
+    __   = \ _ -> return ()
+    k = bindButton mod1Mask
 
 -- | Binding table for other keyboard commands
 keyboardMap :: XConfig Layout -> [(String, X ())]
@@ -496,11 +496,22 @@ bindButton p but m ms mc msc =
                mc'  = myModMask .|.               controlMask
                msc' = myModMask .|. shiftMask .|. controlMask
 
-myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf = mkKeymap conf $ concat $ map ($ conf) myKeymaps
 
+-- | Compile all keyboard maps into a keys hook
+myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
+myKeys conf = mkKeymap conf $ concat $ map ($ conf)
+       [ navigationMap
+       , shortcutMap
+       , layoutMap
+       , keyboardMap
+       ]
+
+-- | Compile all mouse maps into a mouseBindings hook
 myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings conf = M.fromList $ concat $ map ($ conf) myButmaps
+myMouseBindings conf = M.fromList $ concat $ map ($ conf)
+       [ mouseMap
+       , mouseLayoutMap
+       ] 
 
 
 ------------------------------------------------------------------------
