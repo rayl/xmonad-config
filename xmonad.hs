@@ -72,7 +72,7 @@ import XMonad.Layout.WorkspaceDir        (workspaceDir)
 import XMonad.Prompt                     (XPConfig(..),XPrompt(..),mkXPrompt,mkComplFunFromList')
 
 import XMonad.Util.Cursor                (setDefaultCursor)
-import XMonad.Util.EZConfig              (mkKeymap)
+import XMonad.Util.Keytable              (mkMyKeys,mkMyMouseBindings)
 import XMonad.Util.NamedWindows          (getName)
 import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
@@ -215,23 +215,13 @@ shortcutMap conf =
                send    = windows . W.shift
                drag    = \ w -> send w >> view w
 
-
-
 -- | Compile all keyboard maps into a keys hook
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys conf = mkKeymap conf $ concat $ map ($ conf)
-       [ navigationMap
-       , shortcutMap
-       , layoutMap
-       , keyboardMap
-       ]
+myKeys conf = mkMyKeys conf [ navigationMap, shortcutMap, layoutMap, keyboardMap ]
 
 -- | Compile all mouse maps into a mouseBindings hook
 myMouseBindings :: XConfig Layout -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings conf = M.fromList $ concat $ map ($ conf)
-       [ mouseMap
-       , mouseLayoutMap
-       ] 
+myMouseBindings conf = mkMyMouseBindings conf [ mouseMap, mouseLayoutMap ] 
 
 
 ------------------------------------------------------------------------

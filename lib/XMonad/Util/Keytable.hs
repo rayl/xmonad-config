@@ -1,11 +1,25 @@
 
 module XMonad.Util.Keytable
   (
+    mkMyKeys,
+    mkMyMouseBindings,
     bindString,
     bindButton 
   ) where
 
 import XMonad;
+import qualified Data.Map as M (Map,fromList)
+import XMonad.Util.EZConfig (mkKeymap)
+
+mkMyKeys :: XConfig Layout
+         -> [XConfig Layout -> [(String, X ())]]
+         -> M.Map (KeyMask, KeySym) (X ())
+mkMyKeys conf maps = mkKeymap conf $ concat $ map ($ conf) maps
+
+mkMyMouseBindings :: XConfig Layout
+                  -> [XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]]
+                  -> M.Map (KeyMask, Button) (Window -> X ())
+mkMyMouseBindings conf maps = M.fromList $ concat $ map ($ conf) maps
 
 bindString :: String -> String
            -> X () -> X () -> X () -> X ()
@@ -34,4 +48,5 @@ bindButton p but m ms mc msc =
                ms'  = shiftMask
                mc'  =               controlMask
                msc' = shiftMask .|. controlMask
+
 
