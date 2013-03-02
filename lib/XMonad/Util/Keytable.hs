@@ -34,7 +34,7 @@ bindString p key m ms mc msc =
                bind mod key cmd = ("M-" ++ p ++ mod ++ key, cmd)
 
 bindButton :: KeyMask -> Button
-           -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
+           -> X () -> X () -> X () -> X ()
            -> [((KeyMask,Button), (Window -> X ()))]
 bindButton p but m ms mc msc =
         [ bind m'    but m
@@ -43,7 +43,7 @@ bindButton p but m ms mc msc =
         , bind msc'  but msc
         ]
            where
-               bind mod but cmd = ((p .|. mod,but), cmd)
+               bind mod but cmd = ((p .|. mod,but), (\ _ -> cmd))
                m'   = 0
                ms'  = shiftMask
                mc'  =               controlMask

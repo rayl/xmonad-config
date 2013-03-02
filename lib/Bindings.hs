@@ -191,42 +191,42 @@ mouseMap conf = concat
   where
     k = bindButton (modMask conf)
 
-    viewNextWindow   = b $ W.focusDown
-    dragNextWindow   = b $ W.swapDown
+    viewNextWindow   = windows W.focusDown
+    dragNextWindow   = windows W.swapDown
 
-    viewPrevWindow   = b $ W.focusUp
-    dragPrevWindow   = b $ W.swapUp
+    viewPrevWindow   = windows W.focusUp
+    dragPrevWindow   = windows W.swapUp
 
-    viewMainWindow   = b $ W.focusMaster
-    dragMainWindow   = b $ W.shiftMaster
+    viewMainWindow   = windows W.focusMaster
+    dragMainWindow   = windows W.shiftMaster
 
-    viewNextScreen   = a $ relScreen 1 view
-    dragNextScreen   = a $ relScreen 1 drag
+    viewNextScreen   = relScreen 1 view
+    dragNextScreen   = relScreen 1 drag
 
-    viewNextWSpace   = a $ viewNextWS
-    dragNextWSpace   = a $ sendNextWS >> viewNextWS
+    viewNextWSpace   = viewNextWS
+    dragNextWSpace   = sendNextWS >> viewNextWS
 
-    viewPrevWSpace   = a $ viewPrevWS
-    dragPrevWSpace   = a $ sendPrevWS >> viewPrevWS
+    viewPrevWSpace   = viewPrevWS
+    dragPrevWSpace   = sendPrevWS >> viewPrevWS
 
-    zoomWindow       = c $ Toggle ZOOM
-    toggleStruts     = c $ ToggleStruts
+    zoomWindow       = sendMessage $ Toggle ZOOM
+    toggleStruts     = sendMessage $ ToggleStruts
 
-    expandMaster     = c $ Expand
-    shrinkMaster     = c $ Shrink
+    expandMaster     = sendMessage $ Expand
+    shrinkMaster     = sendMessage $ Shrink
 
-    incMaster        = c $ IncMasterN 1
-    decMaster        = c $ IncMasterN (-1)
+    incMaster        = sendMessage $ IncMasterN 1
+    decMaster        = sendMessage $ IncMasterN (-1)
 
-    openTerminal     = a $ spawn $ terminal conf
-    killWindow       = a $ kill
+    openTerminal     = spawn $ terminal conf
+    killWindow       = kill
 
     viewNextWS       = moveTo Next HiddenWS
     viewPrevWS       = moveTo Prev HiddenWS
     sendNextWS       = shiftTo Next HiddenWS
     sendPrevWS       = shiftTo Prev HiddenWS
 
- -- __   = \ _ -> return ()
+ -- __   = return ()
 
 -- | Binding table for keyboard layout control
 layoutMap :: XConfig Layout -> [(String, X ())]
@@ -275,18 +275,18 @@ mouseLayoutMap conf = concat
   where
     k = bindButton ((modMask conf) .|. mod1Mask)
 
-    resetLayout      = a $ setLayout $ layoutHook conf
-    nextLayout       = c $ NextLayout
-    fullscreen       = c $ (Toggle ZOOM)
-    toggleStruts     = c $ ToggleStruts
-    expandMaster     = c $ Expand
-    shrinkMaster     = c $ Shrink
-    expandSlave      = c $ ExpandSlave
-    shrinkSlave      = c $ ShrinkSlave
-    incMaster        = c $ (IncMasterN 1)
-    decMaster        = c $ (IncMasterN (-1))
+    resetLayout      = setLayout $ layoutHook conf
+    nextLayout       = sendMessage $ NextLayout
+    fullscreen       = sendMessage $ Toggle ZOOM
+    toggleStruts     = sendMessage $ ToggleStruts
+    expandMaster     = sendMessage $ Expand
+    shrinkMaster     = sendMessage $ Shrink
+    expandSlave      = sendMessage $ ExpandSlave
+    shrinkSlave      = sendMessage $ ShrinkSlave
+    incMaster        = sendMessage $ IncMasterN 1
+    decMaster        = sendMessage $ IncMasterN (-1)
 
-    __   = \ _ -> return ()
+    __   = return ()
 
 -- | Binding table for other keyboard commands
 keyboardMap :: XConfig Layout -> [(String, X ())]
@@ -390,7 +390,3 @@ relScreen n f = return n
 view = windows . W.view
 send = windows . W.shift
 drag = \ w -> send w >> view w
-
-a x  = \ _ -> x
-b x  = \ _ -> windows x
-c x  = \ _ -> sendMessage x
