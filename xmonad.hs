@@ -577,7 +577,7 @@ instance XPrompt Lay where
    showXPrompt (Lay x) = x
 
 layoutPrompt :: XPConfig -> (String -> X ()) -> X ()
-layoutPrompt c f = mkXPrompt (Lay "") c (mkComplFunFromList' myLayouts) f
+layoutPrompt c f = mkXPrompt (Lay "Choose layout: ") c (mkComplFunFromList' myLayouts) f
 
 
 ------------------------------------------------------------------------
