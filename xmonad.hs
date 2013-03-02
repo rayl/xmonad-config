@@ -284,7 +284,7 @@ navigationMap conf = concat
     k = bindString ""
 
 -- | Binding table for trackball navigation, window motion, and some layout control
-mouseMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
+mouseMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
 mouseMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
   [ k button1        zoomWindow       shrinkMaster     incMaster        openTerminal
@@ -380,17 +380,18 @@ layoutMap conf = concat
     __ = return ()
     k = bindString "M1-"
 
-mouseLayoutMap :: XConfig l -> [((KeyMask, Button), (Window -> X ()))]
+mouseLayoutMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
 mouseLayoutMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
   [ k button1        fullscreen       __               __               __
-  , k button2        __               __               __               __
+  , k button2        __               __               __               resetLayout
   , k button3        toggleStruts     __               __               __
   , k button4        incMaster        expandMaster     expandSlave      __
   , k button5        decMaster        shrinkMaster     shrinkSlave      __
   ]
   where
 
+    resetLayout      = a $ setLayout $ layoutHook conf
     nextLayout       = c $ NextLayout
     fullscreen       = c $ (Toggle ZOOM)
     toggleStruts     = c $ ToggleStruts
@@ -536,7 +537,7 @@ myKeys conf = mkKeymap conf $ concat $ map ($ conf)
        ]
 
 -- | Compile all mouse maps into a mouseBindings hook
-myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
+myMouseBindings :: XConfig Layout -> M.Map (KeyMask, Button) (Window -> X ())
 myMouseBindings conf = M.fromList $ concat $ map ($ conf)
        [ mouseMap
        , mouseLayoutMap
