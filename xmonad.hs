@@ -93,6 +93,7 @@ import XMonad.Prompt.Workspace           (workspacePrompt)
 ------------------------------------------------------------------------
 import XMonad.Util.Cursor                (setDefaultCursor)
 import XMonad.Util.EZConfig              (mkKeymap)
+import qualified XMonad.Util.Keytable as K (bindString,bindButton)
 import XMonad.Util.NamedWindows          (getName)
 import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
@@ -281,7 +282,7 @@ navigationMap conf = concat
     dfl f d l = case l of [] -> d; w:ws -> f w
 
     __ = return ()
-    k = bindString ""
+    k = K.bindString ""
 
 -- | Binding table for trackball navigation, window motion, and some layout control
 mouseMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
@@ -343,7 +344,7 @@ mouseMap conf = concat
     b x  = \ _ -> windows x
     c x  = \ _ -> sendMessage x
  -- __   = \ _ -> return ()
-    k = bindButton 0
+    k = K.bindButton myModMask
 
 -- | Binding table for keyboard layout control
 layoutMap :: XConfig Layout -> [(String, X ())]
@@ -378,7 +379,7 @@ layoutMap conf = concat
     selectLayout     = layoutPrompt acXPConfig (\ l -> sendMessage $ JumpToLayout l)
 
     __ = return ()
-    k = bindString "M1-"
+    k = K.bindString "M1-"
 
 mouseLayoutMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
 mouseLayoutMap conf = concat
@@ -406,7 +407,7 @@ mouseLayoutMap conf = concat
     b x  = \ _ -> windows x
     c x  = \ _ -> sendMessage x
     __   = \ _ -> return ()
-    k = bindButton mod1Mask
+    k = K.bindButton (myModMask .|. mod1Mask)
 
 -- | Binding table for other keyboard commands
 keyboardMap :: XConfig Layout -> [(String, X ())]
@@ -483,7 +484,7 @@ keyboardMap conf = concat
     chdir            = changeDir defaultXPConfig
 
     __ = return ()
-    k = bindString ""
+    k = K.bindString ""
 
 -- | Binding table for hotkey access to stable workspaces
 shortcutMap :: XConfig l -> [(String, X ())]
@@ -497,32 +498,6 @@ shortcutMap conf =
                send    = windows . W.shift
                drag    = \ w -> send w >> view w
 
-
-
-bindString :: String -> String -> X () -> X () -> X () -> X () -> [(String, X ())]
-bindString p key m ms mc msc =
-        [ bind ""      key m
-        , bind "S-"    key ms
-        , bind "C-"    key mc
-        , bind "S-C-"  key msc
-        ]
-           where
-               bind mod key cmd = ("M-" ++ p ++ mod ++ key, cmd)
-
-bindButton :: KeyMask -> Button -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ()) -> (Window -> X ())
-           -> [((KeyMask,Button), (Window -> X ()))]
-bindButton p but m ms mc msc =
-        [ bind m'    but m
-        , bind ms'   but ms
-        , bind mc'   but mc
-        , bind msc'  but msc
-        ]
-           where
-               bind mod but cmd = ((p .|. mod,but), cmd)
-               m'   = myModMask
-               ms'  = myModMask .|. shiftMask
-               mc'  = myModMask .|.               controlMask
-               msc' = myModMask .|. shiftMask .|. controlMask
 
 
 acXPConfig = defaultXPConfig { autoComplete = Just 1 }
