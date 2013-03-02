@@ -89,6 +89,37 @@ import XMonad.Util.Keytable              (bindString,bindButton)
 -- Hidden workspaces are visited in the order shown on the workspace list at the bottom.
 -- Visible workspaces are skipped, as they are accessible by changing screen focus.
 
+viewNextWindow   = windows W.focusDown
+dragNextWindow   = windows W.swapDown
+
+viewPrevWindow   = windows W.focusUp
+dragPrevWindow   = windows W.swapUp
+
+viewMainWindow   = windows W.focusMaster
+dragMainWindow   = windows W.shiftMaster
+
+viewNextScreen   = relScreen 1 view
+dragNextScreen   = sendNextScreen >> viewNextScreen
+sendNextScreen   = relScreen 1 send
+
+viewNextWSpace   = moveTo Next HiddenWS
+dragNextWSpace   = sendNextWSpace >> viewNextWSpace
+sendNextWSpace   = shiftTo Next HiddenWS
+
+viewPrevWSpace   = moveTo Prev HiddenWS
+dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
+sendPrevWSpace   = shiftTo Prev HiddenWS
+
+viewSomeWSpace   = withSomeWS view
+dragSomeWSpace   = withSomeWS drag
+sendSomeWSpace   = withSomeWS send
+
+viewLastWSpace   = withLastWS view
+dragLastWSpace   = withLastWS drag
+sendLastWSpace   = withLastWS send
+
+viewUrgnWSpace   = focusUrgent
+
 
 -- * Window motion
 -- ** Dragging
@@ -116,6 +147,16 @@ import XMonad.Util.Keytable              (bindString,bindButton)
 -- Adjust width of the master window using Mod-S- with button1 and button3.
 -- 
 -- Adjust number of windows in the current column using Mod-C- with button1 and button3.
+nextLayout       = sendMessage $ NextLayout
+fullscreen       = sendMessage $ Toggle ZOOM
+toggleStruts     = sendMessage $ ToggleStruts
+expandMaster     = sendMessage $ Expand
+shrinkMaster     = sendMessage $ Shrink
+expandSlave      = sendMessage $ ExpandSlave
+shrinkSlave      = sendMessage $ ShrinkSlave
+incMaster        = sendMessage $ IncMasterN 1
+decMaster        = sendMessage $ IncMasterN (-1)
+
 
 -- * Misc
 -- ** Keyboard
@@ -126,6 +167,37 @@ import XMonad.Util.Keytable              (bindString,bindButton)
 -- Use Mod-S-C-button1 to open a new terminal above the current window.
 -- 
 -- Use Mod-S-C-button3 to kill the current window.
+restartXmonad    = restart "xmonad" True
+resetXmonad      = restart "xmonad" False
+quitXmonad       = io $ exitWith ExitSuccess
+
+refresh'         = refresh
+
+newWorkspace     = selectWorkspace defaultXPConfig
+nameWorkspace    = renameWorkspace defaultXPConfig
+nukeWorkspace    = __ -- removeEmptyWorkspaceAfterExcept (asks workspaces) viewNextWSpace
+
+killWindow'      = kill
+sinkWindow       = withFocused (windows . W.sink)
+
+gotoMenu'        = gotoMenu
+bringMenu'       = bringMenu
+
+openChrome       = spawn "google-chrome"
+openDmenu        = spawn "dmenu_run"
+
+searchPrompt     = promptSearch defaultXPConfig google
+searchSelection  = selectSearch google
+
+chdir            = changeDir defaultXPConfig
+
+
+
+
+
+
+
+
 
 
 -- | Binding table for keyboard navigation and window motion
@@ -145,88 +217,23 @@ navigationMap conf = concat
   where
     k = bindString ""
 
-    viewNextWindow   = windows W.focusDown
-    dragNextWindow   = windows W.swapDown
 
-    viewPrevWindow   = windows W.focusUp
-    dragPrevWindow   = windows W.swapUp
-
-    viewMainWindow   = windows W.focusMaster
-    dragMainWindow   = windows W.shiftMaster
-
-    viewNextScreen   = relScreen 1 view
-    dragNextScreen   = sendNextScreen >> viewNextScreen
-    sendNextScreen   = relScreen 1 send
-
-    viewNextWSpace   = moveTo Next HiddenWS
-    dragNextWSpace   = sendNextWSpace >> viewNextWSpace
-    sendNextWSpace   = shiftTo Next HiddenWS
-
-    viewPrevWSpace   = moveTo Prev HiddenWS
-    dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
-    sendPrevWSpace   = shiftTo Prev HiddenWS
-
-    viewSomeWSpace   = withSomeWS view
-    dragSomeWSpace   = withSomeWS drag
-    sendSomeWSpace   = withSomeWS send
-
-    viewLastWSpace   = withLastWS view
-    dragLastWSpace   = withLastWS drag
-    sendLastWSpace   = withLastWS send
-
-    viewUrgnWSpace   = focusUrgent
-
-    __ = return ()
 
 -- | Binding table for trackball navigation, window motion, and some layout control
 mouseMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
 mouseMap conf = concat
   --  button         M-               M-S-             M-C-             M-S-C-
-  [ k button1        zoomWindow       shrinkMaster     incMaster        openTerminal
+  [ k button1        fullscreen       shrinkMaster     incMaster        openTerminal
   , k button2        viewNextScreen   dragNextScreen   viewMainWindow   dragMainWindow
-  , k button3        toggleStruts     expandMaster     decMaster        killWindow
+  , k button3        toggleStruts     expandMaster     decMaster        killWindow'
   , k button4        viewPrevWindow   dragPrevWindow   viewPrevWSpace   dragPrevWSpace
   , k button5        viewNextWindow   dragNextWindow   viewNextWSpace   dragNextWSpace
   ] 
   where
     k = bindButton (modMask conf)
-
-    viewNextWindow   = windows W.focusDown
-    dragNextWindow   = windows W.swapDown
-
-    viewPrevWindow   = windows W.focusUp
-    dragPrevWindow   = windows W.swapUp
-
-    viewMainWindow   = windows W.focusMaster
-    dragMainWindow   = windows W.shiftMaster
-
-    viewNextScreen   = relScreen 1 view
-    dragNextScreen   = relScreen 1 drag
-
-    viewNextWSpace   = viewNextWS
-    dragNextWSpace   = sendNextWS >> viewNextWS
-
-    viewPrevWSpace   = viewPrevWS
-    dragPrevWSpace   = sendPrevWS >> viewPrevWS
-
-    zoomWindow       = sendMessage $ Toggle ZOOM
-    toggleStruts     = sendMessage $ ToggleStruts
-
-    expandMaster     = sendMessage $ Expand
-    shrinkMaster     = sendMessage $ Shrink
-
-    incMaster        = sendMessage $ IncMasterN 1
-    decMaster        = sendMessage $ IncMasterN (-1)
-
     openTerminal     = spawn $ terminal conf
-    killWindow       = kill
 
-    viewNextWS       = moveTo Next HiddenWS
-    viewPrevWS       = moveTo Prev HiddenWS
-    sendNextWS       = shiftTo Next HiddenWS
-    sendPrevWS       = shiftTo Prev HiddenWS
 
- -- __   = return ()
 
 -- | Binding table for keyboard layout control
 layoutMap :: XConfig Layout -> [(String, X ())]
@@ -247,21 +254,10 @@ layoutMap conf = concat
   ]
   where
     k = bindString "M1-"
-
-    refresh'         = refresh
     resetLayout      = setLayout $ layoutHook conf
-    nextLayout       = sendMessage NextLayout
-    fullscreen       = sendMessage (Toggle ZOOM)
-    toggleStruts     = sendMessage ToggleStruts
-    expandMaster     = sendMessage Expand
-    shrinkMaster     = sendMessage Shrink
-    expandSlave      = sendMessage ExpandSlave
-    shrinkSlave      = sendMessage ShrinkSlave
-    incMaster        = sendMessage (IncMasterN 1)
-    decMaster        = sendMessage (IncMasterN (-1))
     selectLayout     = __ -- layoutPrompt acXPConfig (\ l -> sendMessage $ JumpToLayout l)
 
-    __ = return ()
+
 
 mouseLayoutMap :: XConfig Layout -> [((KeyMask, Button), (Window -> X ()))]
 mouseLayoutMap conf = concat
@@ -274,19 +270,9 @@ mouseLayoutMap conf = concat
   ]
   where
     k = bindButton ((modMask conf) .|. mod1Mask)
-
     resetLayout      = setLayout $ layoutHook conf
-    nextLayout       = sendMessage $ NextLayout
-    fullscreen       = sendMessage $ Toggle ZOOM
-    toggleStruts     = sendMessage $ ToggleStruts
-    expandMaster     = sendMessage $ Expand
-    shrinkMaster     = sendMessage $ Shrink
-    expandSlave      = sendMessage $ ExpandSlave
-    shrinkSlave      = sendMessage $ ShrinkSlave
-    incMaster        = sendMessage $ IncMasterN 1
-    decMaster        = sendMessage $ IncMasterN (-1)
 
-    __   = return ()
+
 
 -- | Binding table for other keyboard commands
 keyboardMap :: XConfig Layout -> [(String, X ())]
@@ -294,7 +280,7 @@ keyboardMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
   [ k "-"            __               __               __               __
   , k "="            __               __               __               __
-  , k "<Backspace>"  killWindow       __               __               __
+  , k "<Backspace>"  killWindow'      __               __               __
 
   , k "<Tab>"        __               __               __               __
   , k "q"            restartXmonad    resetXmonad      __              quitXmonad
@@ -336,36 +322,7 @@ keyboardMap conf = concat
   where
     k = bindString ""
 
-    restartXmonad    = restart "xmonad" True
-    resetXmonad      = restart "xmonad" False
-    quitXmonad       = io $ exitWith ExitSuccess
-
-    newWorkspace     = selectWorkspace defaultXPConfig
-    nameWorkspace    = renameWorkspace defaultXPConfig
-    nukeWorkspace    = __ -- removeEmptyWorkspaceAfterExcept (asks workspaces) viewNextWSpace
-    viewNextWSpace   = moveTo Next HiddenWS
-
-    killWindow       = kill
-    sinkWindow       = withFocused sink
-    gotoMenu'        = gotoMenu
-    bringMenu'       = bringMenu
-
-    sink             = windows . W.sink
-
     openTerminal     = spawn $ terminal conf
-    openChrome       = spawn "google-chrome"
-    openDmenu        = spawn "dmenu_run"
-    searchPrompt     = promptSearch defaultXPConfig google
-    searchSelection  = selectSearch google
-
-    fullscreen       = sendMessage (Toggle ZOOM)
-    toggleStruts     = sendMessage ToggleStruts
-
-    chdir            = changeDir defaultXPConfig
-
-    __ = return ()
-
-
 
 
 
@@ -390,3 +347,5 @@ relScreen n f = return n
 view = windows . W.view
 send = windows . W.shift
 drag = \ w -> send w >> view w
+
+__   = return ()
