@@ -35,7 +35,7 @@ The core workflow is expected to revolve around:
 -- module XMonadHS where
 
 ------------------------------------------------------------------------
-import XMonad
+import XMonad                            hiding ((|||))
 import qualified XMonad.StackSet as W    -- many
 
 ------------------------------------------------------------------------
@@ -70,6 +70,7 @@ import XMonad.Hooks.UrgencyHook          (withUrgencyHook,NoUrgencyHook(..),
                                           focusUrgent)
 
 ------------------------------------------------------------------------
+import XMonad.Layout.LayoutCombinators   ((|||))
 import XMonad.Layout.IM                  (withIM,Property(Role))
 import XMonad.Layout.MouseResizableTile  (mouseResizableTile,draggerType,
                                           DraggerType(BordersDragger),
