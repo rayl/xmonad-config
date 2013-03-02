@@ -13,6 +13,7 @@
 -- This module provides tables implementing my preferred keybindings.
 -----------------------------------------------------------------------------
 module XMonad.Config.Rayl.Keymaps (
+    mkShortcutMap,
     navigationMap,
     mouseMap,
     layoutMap,
@@ -118,6 +119,10 @@ viewUrgnWSpace   = focusUrgent
 viewSomeWSpace   = withSomeWS view
 
 
+-- $
+-- Direct access to fixed workspaces can be arranged with 'mkShortcutMap'. This
+-- allows single key jumps to 'Main.myWorkspaces' using Mod- plus 'Main.myWsShortcuts'.
+
 
 -- * Window motion
 -- ** Dragging
@@ -125,7 +130,7 @@ viewSomeWSpace   = withSomeWS view
 -- Windows can be dragged around by holding Shift while moving the focus.
 -- Place focus on the window to be moved, press Shift, and navigate to the desired location.
 -- The window will be dragged along as the focus moves.
--- Any focus control (except view urgent) can be augmented with Shift to drag the focused window.
+-- Any focus control (including fixed shotcuts, except Esc) can be augmented with Shift to drag the focused window.
 
 dragNextWindow   = windows W.swapDown
 dragPrevWindow   = windows W.swapUp
@@ -142,7 +147,7 @@ dragSomeWSpace   = withSomeWS drag
 -- $
 -- Windows can also be moved by holding Control and using many keyboard focus commands.
 -- In this case, the window is sent away while the focus remains stationary.
--- Any keyboard focus control (except J, K, and Esc) can be augmented with Control.
+-- Any keyboard focus control (including fixed shortcuts, except J, K, and Esc) can be augmented with Control.
 -- Window sending commands are not mapped to the trackball.
 
 sendNextScreen   = relScreen 1 send
@@ -216,6 +221,20 @@ chdir            = changeDir defaultXPConfig
 
 
 
+-- * Predefined keytables
+-- $
+-- Several predefined keytables are exported.
+-- These tables provide access to the routines described above via my preferred keybindings.
+
+-- | Create a binding table for hotkey access to stable workspaces. The
+-- list of shortcuts must be key names acceptable to 'mkKeyMap'
+mkShortcutMap :: [WorkspaceId] -> [String] -> XConfig l -> [(String, X ())]
+mkShortcutMap ws sc = \ c ->
+        [(mod ++ key, cmd $ tag)
+              | (tag, key) <- zip ws sc
+              , (mod, cmd) <- actions]
+           where
+               actions = [("M-",view),("M-S-",drag),("M-C-",send)]
 
 -- | Binding table for keyboard navigation and window motion
 navigationMap :: XConfig Layout -> [(String, X ())]
@@ -346,7 +365,9 @@ keyboardMap conf = concat
 
 
 
-
+-- * Utility functions
+-- $
+-- A number of small helper functions used in the actions described above.
 
 
 acXPConfig = defaultXPConfig { autoComplete = Just 1 }

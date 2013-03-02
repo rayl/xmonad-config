@@ -78,7 +78,7 @@ import XMonad.Util.NamedWindows          (getName)
 import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
 
-import XMonad.Config.Rayl.Keymaps        (navigationMap,mouseMap,layoutMap,
+import XMonad.Config.Rayl.Keymaps        (mkShortcutMap,navigationMap,mouseMap,layoutMap,
                                           mouseLayoutMap,keyboardMap)
 
 
@@ -101,6 +101,7 @@ myWorkspaces = ["dash","todo","news","book","song"]
 
 -- | The hotkeys used for direct access to fixed workspaces.
 --   Also used for labeling them in the workspace list on the bottom bar.
+myWsShortcuts :: [String]
 myWsShortcuts = map show $ [1..9] ++ [0]
 
 
@@ -113,25 +114,21 @@ myWsShortcuts = map show $ [1..9] ++ [0]
 myModMask = mod4Mask
 
 
--- | Binding table for hotkey access to stable workspaces
-shortcutMap :: XConfig l -> [(String, X ())]
-shortcutMap conf =
-        [(mod ++ key, cmd $ tag)
-              | (tag, key) <- zip myWorkspaces myWsShortcuts
-              , (mod, cmd) <- actions]
-           where
-               actions = [("M-",view),("M-S-",drag),("M-C-",send)]
-               view    = windows . W.view
-               send    = windows . W.shift
-               drag    = \ w -> send w >> view w
-
 -- | Compile all keyboard maps into a keys hook
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
-myKeys = mkMyKeys [ navigationMap, shortcutMap, layoutMap, keyboardMap ]
+myKeys = mkMyKeys
+        [ navigationMap
+        , mkShortcutMap myWorkspaces myWsShortcuts
+        , layoutMap
+        , keyboardMap
+        ]
 
 -- | Compile all mouse maps into a mouseBindings hook
 myMouseBindings :: XConfig Layout -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings = mkMyMouseBindings [ mouseMap, mouseLayoutMap ] 
+myMouseBindings = mkMyMouseBindings
+        [ mouseMap
+        , mouseLayoutMap
+        ] 
 
 
 ------------------------------------------------------------------------
