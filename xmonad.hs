@@ -70,7 +70,7 @@ import XMonad.Hooks.UrgencyHook          (withUrgencyHook,NoUrgencyHook(..),
                                           focusUrgent)
 
 ------------------------------------------------------------------------
-import XMonad.Layout.LayoutCombinators   ((|||))
+import XMonad.Layout.LayoutCombinators   ((|||),JumpToLayout(..))
 import XMonad.Layout.IM                  (withIM,Property(Role))
 import XMonad.Layout.MouseResizableTile  (mouseResizableTile,draggerType,
                                           DraggerType(BordersDragger),
@@ -86,7 +86,8 @@ import XMonad.Layout.ResizableTile       (ResizableTall(..))
 import XMonad.Layout.WorkspaceDir        (workspaceDir,changeDir)
 
 ------------------------------------------------------------------------
-import XMonad.Prompt                     (defaultXPConfig,autoComplete)
+import XMonad.Prompt                     (XPConfig(..),defaultXPConfig,autoComplete,
+                                          XPrompt(..),mkXPrompt,mkComplFunFromList')
 import XMonad.Prompt.Workspace           (workspacePrompt)
 
 ------------------------------------------------------------------------
@@ -270,7 +271,7 @@ navigationMap conf = concat
     drag             = \ w -> send w >> view w
 
     withLastWS f     = gets ((dfl W.tag "") . W.hidden . windowset) >>= f
-    withSomeWS       = workspacePrompt defaultXPConfig { autoComplete = Just 1 }
+    withSomeWS       = workspacePrompt acXPConfig
 
     relScreen n f    = return n
                    >>= screenBy
@@ -359,6 +360,7 @@ layoutMap conf = concat
   , k "<Down>"       expandSlave      __               __               __
   , k "<Left>"       shrinkMaster     __               __               __
   , k "<Right>"      expandMaster     __               __               __
+  , k "<Return>"     selectLayout     __               __               __
   ]
   where
 
@@ -373,6 +375,7 @@ layoutMap conf = concat
     shrinkSlave      = sendMessage ShrinkSlave
     incMaster        = sendMessage (IncMasterN 1)
     decMaster        = sendMessage (IncMasterN (-1))
+    selectLayout     = layoutPrompt acXPConfig (\ l -> sendMessage $ JumpToLayout l)
 
     __ = return ()
     k = bindString "M1-"
@@ -511,6 +514,8 @@ bindButton p but m ms mc msc =
                msc' = myModMask .|. shiftMask .|. controlMask
 
 
+acXPConfig = defaultXPConfig { autoComplete = Just 1 }
+
 -- | Compile all keyboard maps into a keys hook
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf = mkKeymap conf $ concat $ map ($ conf)
@@ -563,6 +568,16 @@ myLayoutHook = id
     l_TALL = name "tall" $ ResizableTall 2 (1/118) (11/20) [1]
 
     name x = renamed [Replace x]
+
+myLayouts = ["3col","2col","full","drag","tall"]
+
+data Lay = Lay String
+
+instance XPrompt Lay where
+   showXPrompt (Lay x) = x
+
+layoutPrompt :: XPConfig -> (String -> X ()) -> X ()
+layoutPrompt c f = mkXPrompt (Lay "") c (mkComplFunFromList' myLayouts) f
 
 
 ------------------------------------------------------------------------
