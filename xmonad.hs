@@ -31,8 +31,7 @@ The core workflow is expected to revolve around:
 
 -}
 
--- Uncomment to run Haddock on this file. Recomment in order to make --recompile work...
--- module XMonadHS where
+module Main (main) where
 
 import XMonad                            hiding ((|||))
 import qualified XMonad.StackSet as W    -- many
