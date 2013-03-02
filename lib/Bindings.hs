@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK prune,ignore-exports #-}
 
 module Bindings
   ( navigationMap
@@ -34,6 +35,97 @@ import XMonad.Prompt                     (defaultXPConfig,autoComplete)
 import XMonad.Prompt.Workspace           (workspacePrompt)
 
 import XMonad.Util.Keytable              (bindString,bindButton)
+
+
+-- * Focus control
+-- $
+-- Focus control allows navigation between windows, screens and workspaces.
+-- Full keyboard and partial trackball bindings are available.
+-- With a few trackball exceptions, control is done using just Mod plus one of several command keys.
+--
+-- The focus policy is strictly FocusFollowsMouse and MouseFollowsFocus. 
+-- It is not possible for the mouse pointer and the focused window to diverge.
+
+
+-- ** Keyboard
+-- $
+-- Window focus is set with J, K and M.
+-- Mod-J and Mod-K move the focus around the current screen.
+-- Windows are visited in stack order.
+-- Mod-M warps focus to the master window.
+-- 
+-- Screen focus is set with L.
+-- Mod-L jumps to the next screen.
+-- Navigation is forward-only, cycling at the end of the screen list.
+-- On a dual-head system, this acts as a simple back-and-forth toggle between screens.
+-- 
+-- Workspace focus is set with U and I.
+-- Mod-U and Mod-I cycle around the hidden workspaces.
+-- Hidden workspaces are visited in the order shown on the workspace list at the bottom.
+-- Visible workspaces are skipped, as they are accessible by changing screen focus.
+--
+-- Special workspace access is available with grave, Esc, and O.
+-- Mod-<grave> bounces back and forth between the last visited workspace.
+-- Mod-<Esc> jumps to a workspace with an urgent window.
+-- Mod-O prompts (with autocompletion) for a workspace name.
+-- When a unique, existing workspace prefix is detected, focus immediately jumps to that workspace.
+-- Screen focus may change if the workspace is currently visible.
+
+
+-- ** Trackball
+-- $
+-- Window focus is set with the wheel.
+-- Hold Mod- and roll the wheel back and forth to move the focus around the current screen.
+-- Windows are visited in stack order.
+-- Hold Mod-C- and click the wheel to warp focus to the master window.
+-- 
+-- Screen focus is set with the wheel.
+-- Hold Mod- and click the wheel to jump to the next screen.
+-- Navigation is forward-only, cycling at the end of the screen list.
+-- On a dual-head system, this acts as a simple back-and-forth toggle between screens.
+-- 
+-- Workspace focus is set with the wheel.
+-- Hold Mod-C- and roll the wheel back and forth to cycle around the hidden workspaces.
+-- Hidden workspaces are visited in the order shown on the workspace list at the bottom.
+-- Visible workspaces are skipped, as they are accessible by changing screen focus.
+
+
+-- * Window motion
+-- ** Dragging
+-- $
+-- Windows can be dragged around by holding Shift while moving the focus.
+-- Place focus on the window to be moved, press Shift, and navigate to the desired location.
+-- The window will be dragged along as the focus moves.
+-- Any focus control (except view urgent) can be augmented with Shift to drag the focused window.
+
+-- ** Sending
+-- $
+-- Windows can also be moved by holding Control and using many keyboard focus commands.
+-- In this case, the window is sent away while the focus remains stationary.
+-- Any keyboard focus control (except J, K, and Esc) can be augmented with Control.
+-- Window sending commands are not mapped to the trackball.
+
+-- * Layout control
+-- ** Keyboard
+-- $
+
+-- ** Trackball
+-- $
+-- Toggle fullscreen with Mod-button1. Toggle status bars with Mod-button3.
+-- 
+-- Adjust width of the master window using Mod-S- with button1 and button3.
+-- 
+-- Adjust number of windows in the current column using Mod-C- with button1 and button3.
+
+-- * Misc
+-- ** Keyboard
+-- $
+
+-- ** Trackball
+-- $
+-- Use Mod-S-C-button1 to open a new terminal above the current window.
+-- 
+-- Use Mod-S-C-button3 to kill the current window.
 
 
 -- | Binding table for keyboard navigation and window motion
