@@ -136,11 +136,12 @@ myMouseBindings = mkMyMouseBindings
 namedScratchpadMap :: XConfig Layout -> [(String, X ())]
 namedScratchpadMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "x"            mixer            __               __               __
+  [ k "x"            mixer            xprop            __               __
   ]
   where
     k = bindString ""
     mixer = namedScratchpadAction myScratchpads "mixer"
+    xprop = withFocused (\ w -> spawn $ "urxvt -hold -e xprop -id " ++ show w)
     __ = return ()
 
 
