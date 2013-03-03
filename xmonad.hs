@@ -73,7 +73,9 @@ import XMonad.Layout.WorkspaceDir        (workspaceDir)
 import XMonad.Prompt                     (XPConfig(..),XPrompt(..),mkXPrompt,mkComplFunFromList')
 
 import XMonad.Util.Cursor                (setDefaultCursor)
-import XMonad.Util.Keymap                (mkMyKeys,mkMyMouseBindings)
+import XMonad.Util.Keymap                (mkMyKeys,mkMyMouseBindings,bindString)
+import XMonad.Util.NamedScratchpad       (NamedScratchpad(NS),namedScratchpadAction,
+                                          namedScratchpadManageHook,customFloating)
 import XMonad.Util.NamedWindows          (getName)
 import XMonad.Util.Run                   (spawnPipe)
 import XMonad.Util.WorkspaceCompare      (mkWsSort,getWsIndex)
@@ -119,6 +121,7 @@ myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys = mkMyKeys
         [ navigationMap
         , mkShortcutMap myWorkspaces myWsShortcuts
+        , namedScratchpadMap
         , layoutMap
         , keyboardMap
         ]
@@ -129,6 +132,27 @@ myMouseBindings = mkMyMouseBindings
         [ mouseMap
         , mouseLayoutMap
         ] 
+
+namedScratchpadMap :: XConfig Layout -> [(String, X ())]
+namedScratchpadMap conf = concat
+  --  keysym         M-               M-S-             M-C-             M-S-C-
+  [ k "x"            mixer            __               __               __
+  ]
+  where
+    k = bindString ""
+    mixer = namedScratchpadAction myScratchpads "mixer"
+    __ = return ()
+
+
+------------------------------------------------------------------------
+-- * Named scratchpads
+------------------------------------------------------------------------
+myScratchpads =
+        [ NS "mixer"
+             "urxvt -e alsamixer"
+             (title =? "alsamixer")
+             (customFloating $ W.RationalRect (1/12) (1/4) (5/6) (1/2))
+        ]
 
 
 ------------------------------------------------------------------------
@@ -329,6 +353,7 @@ myLogHook c u0 d0 u1 d1 = do
 myManageHook :: XConfig l -> ManageHook
 myManageHook c = idHook
                     <+> myManageHooks
+                    <+> namedScratchpadManageHook myScratchpads
                     <+> manageDocks
 
 myManageHooks :: ManageHook

@@ -341,7 +341,6 @@ keyboardMap conf = concat
   , k "<Return>"     __               __               __               __
 
   , k "z"            fullscreen       toggleStruts     __               __
-  , k "x"            __               __               __               __
   , k "c"            chdir            __               __               __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
