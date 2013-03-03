@@ -39,7 +39,7 @@ import qualified XMonad.StackSet as W    -- many
 
 import Data.Char                         (toUpper)
 import Data.Function                     (on)
-import qualified Data.List as L          (intersperse,find)
+import qualified Data.List as L          (intersperse,find,isInfixOf)
 import qualified Data.Map as M           (Map,fromList,lookup)
 import Data.Maybe                        (fromMaybe)
 import Data.Monoid                       (All,mconcat)
@@ -363,6 +363,10 @@ myManageHooks = composeAll
     ]
     where
        unfloat = ask >>= doF . W.sink
+
+-- | @q =~ x@. if the result of @q@ contains @x@, return 'True'.
+(=~) :: Eq a => Query [a] -> [a] -> Query Bool
+q =~ x = fmap (x `L.isInfixOf`) q
 
 
 ------------------------------------------------------------------------
