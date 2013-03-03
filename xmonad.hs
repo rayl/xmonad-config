@@ -42,7 +42,7 @@ import Data.Function                     (on)
 import qualified Data.List as L          (intersperse,find)
 import qualified Data.Map as M           (Map,fromList,lookup)
 import Data.Maybe                        (fromMaybe)
-import Data.Monoid                       (All,mconcat,mempty)
+import Data.Monoid                       (All,mconcat)
 import Graphics.X11                      -- keysyms,etc
 import System.Directory                  (getCurrentDirectory)
 import System.IO                         (hPutStrLn,Handle)
@@ -273,7 +273,7 @@ myLogHook c u0 d0 u1 d1 = do
     h0 <- workspaceOnScreen 0
     h1 <- workspaceOnScreen 1
 
-    mempty
+    idHook
        <+> dynamicLogWithPP (topPP u0 g0 h0)
        <+> dynamicLogWithPP (topPP u1 g1 h1)
        <+> dynamicLogWithPP bottomPP
@@ -327,7 +327,7 @@ myLogHook c u0 d0 u1 d1 = do
 -- In progress.
 ------------------------------------------------------------------------
 myManageHook :: XConfig l -> ManageHook
-myManageHook c = mempty
+myManageHook c = idHook
                     <+> myManageHooks
                     <+> manageDocks
 
@@ -344,7 +344,7 @@ myManageHooks = composeAll
 -- In progress.
 ------------------------------------------------------------------------
 myHandleEventHook :: XConfig l -> (Event -> X All)
-myHandleEventHook c = mempty
+myHandleEventHook c = idHook
                          <+> fullscreenEventHook
                          <+> docksEventHook
                          <+> handleEventHook c
@@ -356,7 +356,7 @@ myHandleEventHook c = mempty
 -- | Set the mouse cursor to a nice pointer.
 -- Set WM name to LG3D for better Java compatibility.
 myStartupHook :: X ()
-myStartupHook = mempty
+myStartupHook = idHook
                    <+> setDefaultCursor xC_left_ptr
                    <+> setWMName "LG3D"
 
