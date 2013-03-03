@@ -358,11 +358,19 @@ myManageHook c = idHook
                     <+> manageDocks
 
 myManageHooks :: ManageHook
-myManageHooks = composeAll
-    [ className =? "Gimp"             --> unfloat
+myManageHooks = composeAll . concat $
+    [ [ className =? "Gimp"             --> unfloat                                 ]
+    , [ className =~ (fst x)            --> doShift (snd x)  | x <- wsByClass       ]
+    , [ title =~ (fst x)                --> doShift (snd x)  | x <- wsByTitle       ]
     ]
     where
        unfloat = ask >>= doF . W.sink
+
+wsByClass :: [(String,WorkspaceId)]
+wsByClass = []
+
+wsByTitle :: [(String,WorkspaceId)]
+wsByTitle = []
 
 -- | @q =~ x@. if the result of @q@ contains @x@, return 'True'.
 (=~) :: Eq a => Query [a] -> [a] -> Query Bool
