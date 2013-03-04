@@ -150,8 +150,8 @@ namedScratchpadMap conf = concat
 ------------------------------------------------------------------------
 myScratchpads =
         [ NS "mixer"
-             "urxvt -e alsamixer"
-             (title =? "alsamixer")
+             "konsole --name=NSPWINDOW --hide-menubar --hide-tabbar --nofork -e alsamixer"
+             (title =~ "alsamixer")
              (customFloating $ W.RationalRect (1/12) (1/4) (5/6) (1/2))
         ]
 
