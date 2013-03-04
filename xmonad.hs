@@ -52,7 +52,8 @@ import XMonad.Actions.UpdatePointer      (updatePointer,PointerPosition(Relative
 import XMonad.Config.Rayl.Layout         (MyTransformers(ZOOM))
 
 import XMonad.Hooks.DynamicLog           -- many
-import XMonad.Hooks.EwmhDesktops         (ewmh,fullscreenEventHook)
+import XMonad.Hooks.EwmhDesktops         (ewmhDesktopsStartup,ewmhDesktopsLogHook,
+                                          ewmhDesktopsEventHook,fullscreenEventHook)
 import XMonad.Hooks.ManageDocks          (manageDocks,docksEventHook, avoidStruts)
 import XMonad.Hooks.SetWMName            (setWMName)
 import XMonad.Hooks.UrgencyHook          (withUrgencyHook,NoUrgencyHook(..))
@@ -303,6 +304,7 @@ myLogHook c u0 d0 u1 d1 = do
        <+> dynamicLogWithPP (topPP u1 g1 h1)
        <+> dynamicLogWithPP bottomPP
        <+> updatePointer (Relative 0.5 0.5)
+       <+> ewmhDesktopsLogHook
        <+> logHook c
 
              where
@@ -385,6 +387,7 @@ myHandleEventHook :: XConfig l -> (Event -> X All)
 myHandleEventHook c = idHook
                          <+> fullscreenEventHook
                          <+> docksEventHook
+                         <+> ewmhDesktopsEventHook
                          <+> handleEventHook c
 
 
@@ -393,11 +396,12 @@ myHandleEventHook c = idHook
 ------------------------------------------------------------------------
 -- | Set the mouse cursor to a nice pointer.
 -- Set WM name to LG3D for better Java compatibility.
-myStartupHook :: X ()
-myStartupHook = idHook
-                   <+> setDefaultCursor xC_left_ptr
-                   <+> setWMName "LG3D"
-
+myStartupHook :: XConfig l -> X ()
+myStartupHook c = idHook
+                     <+> setDefaultCursor xC_left_ptr
+                     <+> setWMName "LG3D"
+                     <+> ewmhDesktopsStartup
+                     <+> startupHook c
 
 ------------------------------------------------------------------------
 -- * Main
@@ -410,8 +414,7 @@ main = do
     bottomBar0 <- spawnBar 0 B
     topBar1    <- spawnBar 1 T
     bottomBar1 <- spawnBar 1 B
-    xmonad $ ewmh
-           $ withUrgencyHook NoUrgencyHook
+    xmonad $ withUrgencyHook NoUrgencyHook
            $ defaultConfig
         { borderWidth        = 2
         , workspaces         = myWorkspaces
@@ -423,7 +426,7 @@ main = do
         , keys               = myKeys
         , logHook            = myLogHook defaultConfig topBar0 bottomBar0
                                                        topBar1 bottomBar1
-        , startupHook        = myStartupHook
+        , startupHook        = myStartupHook defaultConfig
         , mouseBindings      = myMouseBindings
         , manageHook         = myManageHook defaultConfig
         , handleEventHook    = myHandleEventHook defaultConfig
