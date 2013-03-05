@@ -151,7 +151,7 @@ namedScratchpadMap conf = concat
 ------------------------------------------------------------------------
 myScratchpads =
         [ NS "mixer"
-             "konsole --name=NSPWINDOW --hide-menubar --hide-tabbar --nofork -e alsamixer"
+             "urxvt -e alsamixer"
              (title =~ "alsamixer")
              (customFloating $ W.RationalRect (1/12) (1/4) (5/6) (1/2))
         ]
@@ -419,7 +419,7 @@ main = do
         { borderWidth        = 2
         , workspaces         = myWorkspaces
         , layoutHook         = myLayoutHook
-        , terminal           = "konsole"
+        , terminal           = "urxvt"
         , normalBorderColor  = "#222"
         , focusedBorderColor = "#ff4"
         , modMask            = myModMask
