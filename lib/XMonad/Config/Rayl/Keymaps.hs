@@ -197,7 +197,7 @@ refresh'         = refresh
 
 newWorkspace     = selectWorkspace defaultXPConfig
 nameWorkspace    = renameWorkspace defaultXPConfig
-nukeWorkspace    = __ -- removeEmptyWorkspaceAfterExcept (asks workspaces) viewNextWSpace
+nukeWorkspace    = asks (workspaces . config) >>= \ s -> removeEmptyWorkspaceAfterExcept s viewNextWSpace
 
 killWindow'      = kill
 sinkWindow       = withFocused (windows . W.sink)
