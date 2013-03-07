@@ -100,7 +100,7 @@ import XMonad.Config.Rayl.Keymaps        (mkShortcutMap,navigationMap,mouseMap,l
 
 -- | The list of fixed workspaces. 
 myWorkspaces :: [WorkspaceId]
-myWorkspaces = ["dash","todo","news","book","song"]
+myWorkspaces = ["dash","todo","news","book"]
 
 -- | The hotkeys used for direct access to fixed workspaces.
 --   Also used for labeling them in the workspace list on the bottom bar.
@@ -137,11 +137,12 @@ myMouseBindings = mkMyMouseBindings
 namedScratchpadMap :: XConfig Layout -> [(String, X ())]
 namedScratchpadMap conf = concat
   --  keysym         M-               M-S-             M-C-             M-S-C-
-  [ k "x"            mixer            xprop            __               __
+  [ k "x"            mixer            amarok           xprop            __
   ]
   where
     k = bindString ""
     mixer = namedScratchpadAction myScratchpads "mixer"
+    amarok = namedScratchpadAction myScratchpads "amarok"
     xprop = withFocused (\ w -> spawn $ "urxvt -hold -e xprop -id " ++ show w)
     __ = return ()
 
@@ -154,6 +155,10 @@ myScratchpads =
              "urxvt -e alsamixer"
              (title =~ "alsamixer")
              (customFloating $ W.RationalRect (1/12) (1/4) (5/6) (1/2))
+        , NS "amarok"
+             "amarok"
+             (className =? "Amarok")
+             (customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6))
         ]
 
 
