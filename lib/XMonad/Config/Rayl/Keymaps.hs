@@ -30,7 +30,7 @@ import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 
 import XMonad.Actions.CycleWS            (moveTo,WSType(HiddenWS),
                                           Direction1D(..),shiftTo,screenBy)
-import XMonad.Actions.DynamicWorkspaces  (selectWorkspace,renameWorkspace,
+import XMonad.Actions.DynamicWorkspaces  (addHiddenWorkspace,renameWorkspace,
                                           removeEmptyWorkspaceAfterExcept)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
 import XMonad.Actions.WindowBringer      (bringMenu,gotoMenu)
@@ -107,16 +107,18 @@ viewNextWSpace   = moveTo Next HiddenWS
 viewPrevWSpace   = moveTo Prev HiddenWS
 
 -- $
--- Special workspace access is available on the keyboard using grave, Esc, and O.
+-- Special workspace access is available on the keyboard using grave, Esc, O, and N.
 -- Mod-<grave> bounces back and forth between the last visited workspace.
 -- Mod-<Esc> jumps to a workspace with an urgent window.
 -- Mod-O prompts (with autocompletion) for a workspace name.
 -- When a unique, existing workspace prefix is detected, focus immediately jumps to that workspace.
 -- Screen focus may change if the workspace is currently visible.
+-- Mod-N prompts for a fresh workspace name to be created.
 
 viewLastWSpace   = withLastWS view
 viewUrgnWSpace   = focusUrgent
 viewSomeWSpace   = withSomeWS view
+viewFrshWSpace   = withFrshWS view
 
 
 -- $
@@ -140,6 +142,7 @@ dragNextWSpace   = sendNextWSpace >> viewNextWSpace
 dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
 dragLastWSpace   = withLastWS drag
 dragSomeWSpace   = withSomeWS drag
+dragFrshWSpace   = withFrshWS drag
 
 
 
@@ -154,6 +157,7 @@ sendNextScreen   = relScreen 1 send
 sendNextWSpace   = shiftTo Next HiddenWS
 sendPrevWSpace   = shiftTo Prev HiddenWS
 sendSomeWSpace   = withSomeWS send
+sendFrshWSpace   = withFrshWS send
 sendLastWSpace   = withLastWS send
 
 
@@ -195,7 +199,6 @@ quitXmonad       = io $ exitWith ExitSuccess
 
 refresh'         = refresh
 
-newWorkspace     = selectWorkspace defaultXPConfig
 nameWorkspace    = renameWorkspace defaultXPConfig
 nukeWorkspace    = asks (workspaces . config) >>= \ s -> removeEmptyWorkspaceAfterExcept s viewNextWSpace
 
@@ -249,6 +252,7 @@ navigationMap conf = concat
   , k "k"            viewPrevWindow   dragPrevWindow   __               __
   , k "l"            viewNextScreen   dragNextScreen   sendNextScreen   __
   , k "m"            viewMainWindow   dragMainWindow   __               __
+  , k "n"            viewFrshWSpace   dragFrshWSpace   sendFrshWSpace   __
   ]
   where
     k = bindString ""
@@ -335,7 +339,7 @@ keyboardMap conf = concat
   , k "d"            __               __               __               __
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
-  , k "h"            __               __               __               __
+  , k "h"            nameWorkspace    nukeWorkspace    __               __
   , k ";"            __               __               __               __
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
@@ -344,7 +348,6 @@ keyboardMap conf = concat
   , k "c"            chdir            __               __               __
   , k "v"            __               __               __               __
   , k "b"            __               __               __               __
-  , k "n"            newWorkspace     nameWorkspace    nukeWorkspace    __
   , k "/"            __               __               __               __
 
   , k "<Home>"       __               __               __               __
@@ -373,7 +376,7 @@ acXPConfig = defaultXPConfig { autoComplete = Just 1 }
 
 withLastWS f = gets ((dfl W.tag "") . W.hidden . windowset) >>= f
 withSomeWS   = workspacePrompt acXPConfig
-
+withFrshWS f = workspacePrompt defaultXPConfig (\ w -> addHiddenWorkspace w >> f w)
 dfl f d l = case l of [] -> d; w:ws -> f w
 
 relScreen n f = return n
