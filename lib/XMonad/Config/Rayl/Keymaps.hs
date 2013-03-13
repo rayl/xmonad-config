@@ -28,8 +28,8 @@ import qualified XMonad.StackSet as W    -- many
 import Graphics.X11                      -- keysyms,etc
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 
-import XMonad.Actions.CycleWS            (moveTo,WSType(HiddenWS),
-                                          Direction1D(..),shiftTo,screenBy)
+import XMonad.Actions.CycleWS            (WSType(HiddenWS),Direction1D(..),
+                                          screenBy,findWorkspace)
 import XMonad.Actions.DynamicWorkspaces  (addHiddenWorkspace,renameWorkspace,
                                           removeEmptyWorkspaceAfterExcept)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
@@ -49,6 +49,7 @@ import XMonad.Prompt                     (defaultXPConfig,autoComplete)
 import XMonad.Prompt.Workspace           (workspacePrompt)
 
 import XMonad.Util.Keymap                (bindString,bindButton)
+import XMonad.Util.WorkspaceCompare      (getSortByIndex)
 
 
 -- * Focus control
@@ -103,8 +104,8 @@ viewNextScreen   = relScreen 1 view
 -- On the trackball, workspace focus is set with the wheel.
 -- Hold Mod-C- and roll the wheel back and forth to cycle around the hidden workspaces.
 
-viewNextWSpace   = moveTo Next HiddenWS
-viewPrevWSpace   = moveTo Prev HiddenWS
+viewNextWSpace   = nuke $ withNextWS view
+viewPrevWSpace   = nuke $ withPrevWS view
 
 -- $
 -- Special workspace access is available on the keyboard using grave, Esc, O, and N.
@@ -115,10 +116,10 @@ viewPrevWSpace   = moveTo Prev HiddenWS
 -- Screen focus may change if the workspace is currently visible.
 -- Mod-N prompts for a fresh workspace name to be created.
 
-viewLastWSpace   = withLastWS view
-viewUrgnWSpace   = focusUrgent
-viewSomeWSpace   = withSomeWS view
-viewFrshWSpace   = withFrshWS view
+viewLastWSpace   = nuke $ withLastWS view
+viewUrgnWSpace   = nuke $ focusUrgent
+viewSomeWSpace   = nuke $ withSomeWS view
+viewFrshWSpace   = nuke $ withFrshWS view
 
 
 -- $
@@ -138,11 +139,11 @@ dragNextWindow   = windows W.swapDown
 dragPrevWindow   = windows W.swapUp
 dragMainWindow   = windows W.shiftMaster
 dragNextScreen   = sendNextScreen >> viewNextScreen
-dragNextWSpace   = sendNextWSpace >> viewNextWSpace
-dragPrevWSpace   = sendPrevWSpace >> viewPrevWSpace
-dragLastWSpace   = withLastWS drag
-dragSomeWSpace   = withSomeWS drag
-dragFrshWSpace   = withFrshWS drag
+dragNextWSpace   = nuke $ withNextWS drag
+dragPrevWSpace   = nuke $ withPrevWS drag
+dragLastWSpace   = nuke $ withLastWS drag
+dragSomeWSpace   = nuke $ withSomeWS drag
+dragFrshWSpace   = nuke $ withFrshWS drag
 
 
 
@@ -154,8 +155,8 @@ dragFrshWSpace   = withFrshWS drag
 -- Window sending commands are not mapped to the trackball.
 
 sendNextScreen   = relScreen 1 send
-sendNextWSpace   = shiftTo Next HiddenWS
-sendPrevWSpace   = shiftTo Prev HiddenWS
+sendNextWSpace   = withNextWS send
+sendPrevWSpace   = withPrevWS send
 sendSomeWSpace   = withSomeWS send
 sendFrshWSpace   = withFrshWS send
 sendLastWSpace   = withLastWS send
@@ -200,7 +201,6 @@ quitXmonad       = io $ exitWith ExitSuccess
 refresh'         = refresh
 
 nameWorkspace    = renameWorkspace defaultXPConfig
-nukeWorkspace    = asks (workspaces . config) >>= \ s -> removeEmptyWorkspaceAfterExcept s viewNextWSpace
 
 killWindow'      = kill
 sinkWindow       = withFocused (windows . W.sink)
@@ -339,7 +339,7 @@ keyboardMap conf = concat
   , k "d"            __               __               __               __
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
-  , k "h"            nameWorkspace    nukeWorkspace    __               __
+  , k "h"            nameWorkspace    __               __               __
   , k ";"            __               __               __               __
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
@@ -374,15 +374,20 @@ keyboardMap conf = concat
 
 acXPConfig = defaultXPConfig { autoComplete = Just 1 }
 
+withNextWS f = findWorkspace getSortByIndex Next HiddenWS 1 >>= f
+withPrevWS f = findWorkspace getSortByIndex Prev HiddenWS 1 >>= f
 withLastWS f = gets ((dfl W.tag "") . W.hidden . windowset) >>= f
 withSomeWS   = workspacePrompt acXPConfig
 withFrshWS f = workspacePrompt defaultXPConfig (\ w -> addHiddenWorkspace w >> f w)
+
 dfl f d l = case l of [] -> d; w:ws -> f w
 
 relScreen n f = return n
             >>= screenBy
             >>= screenWorkspace
             >>= flip whenJust f
+
+nuke f = asks (workspaces . config) >>= \ s -> removeEmptyWorkspaceAfterExcept s f
 
 view = windows . W.view
 send = windows . W.shift
