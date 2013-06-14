@@ -172,7 +172,7 @@ myScratchpads =
 ------------------------------------------------------------------------
 myLayoutHook = id
              $ avoidStruts
-             $ workspaceDir "~"
+             $ workspaceDir "/home/local"
              $ smartBorders
              $ mkToggle (single ZOOM)
              $ onWorkspace "gimp" (gimpModify gimpLayouts)
