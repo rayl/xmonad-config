@@ -404,8 +404,8 @@ myHandleEventHook c = idHook
 myStartupHook :: XConfig l -> X ()
 myStartupHook c = idHook
                      <+> setDefaultCursor xC_left_ptr
-                     <+> setWMName "LG3D"
                      <+> ewmhDesktopsStartup
+                     <+> setWMName "LG3D"
                      <+> startupHook c
 
 ------------------------------------------------------------------------
