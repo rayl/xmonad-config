@@ -237,7 +237,7 @@ mkShortcutMap ws sc = \ c ->
               | (tag, key) <- zip ws sc
               , (mod, cmd) <- actions]
            where
-               actions = [("M-",view),("M-S-",drag),("M-C-",send)]
+               actions = [("M-", nuke . view),("M-S-", nuke . drag),("M-C-",send)]
 
 -- | Binding table for keyboard navigation and window motion
 navigationMap :: XConfig Layout -> [(String, X ())]
