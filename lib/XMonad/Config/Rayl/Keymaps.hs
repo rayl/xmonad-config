@@ -29,7 +29,7 @@ import Graphics.X11                      -- keysyms,etc
 import System.Exit                       (exitWith,ExitCode(ExitSuccess))
 
 import XMonad.Actions.CycleWS            (WSType(HiddenWS),Direction1D(..),
-                                          screenBy,findWorkspace)
+                                          screenBy,findWorkspace,swapNextScreen)
 import XMonad.Actions.DynamicWorkspaces  (addHiddenWorkspace,renameWorkspace,
                                           removeEmptyWorkspaceAfterExcept)
 import XMonad.Actions.Search             (promptSearch,selectSearch,google)
@@ -82,6 +82,8 @@ viewMainWindow   = windows W.focusMaster
 
 -- ** Screen
 -- $
+-- Screen refers to window-display mapping, while Monitor refers to workspace-display mappping.
+--
 -- On the keyboard, screen focus is set with L.
 -- Mod-L jumps to the next screen.
 -- Navigation is forward-only, cycling at the end of the screen list.
@@ -92,6 +94,22 @@ viewMainWindow   = windows W.focusMaster
 
 viewNextScreen   = relScreen 1 view
 
+
+
+-- ** Monitor
+-- $
+-- Monitor refers to workspace-display mappping, while Screen refers to window-display mapping.
+-- 
+-- On the keyboard, monitor focus is set with ;
+-- Mod-; jumps to the next monitor (ie: same as next screen)
+-- Mod-Shift-; moves current workspace to next display and takes focus there
+-- Mod-Ctrl-; moves current workspace to next display and keeps focus on current display
+--
+-- These commands are not mapped to trackball
+
+viewNextMonitr = viewNextScreen
+dragNextMonitr = swapNextScreen >> viewNextScreen
+sendNextMonitr = swapNextScreen
 
 
 -- ** Workspace
@@ -251,6 +269,7 @@ navigationMap conf = concat
   , k "j"            viewNextWindow   dragNextWindow   __               __
   , k "k"            viewPrevWindow   dragPrevWindow   __               __
   , k "l"            viewNextScreen   dragNextScreen   sendNextScreen   __
+  , k ";"            viewNextMonitr   dragNextMonitr   sendNextMonitr   __
   , k "m"            viewMainWindow   dragMainWindow   __               __
   , k "n"            viewFrshWSpace   dragFrshWSpace   sendFrshWSpace   __
   ]
@@ -340,7 +359,6 @@ keyboardMap conf = concat
   , k "f"            __               __               __               __
   , k "g"            __               __               __               __
   , k "h"            nameWorkspace    __               __               __
-  , k ";"            __               __               __               __
   , k "'"            __               __               __               __
   , k "<Return>"     __               __               __               __
 
